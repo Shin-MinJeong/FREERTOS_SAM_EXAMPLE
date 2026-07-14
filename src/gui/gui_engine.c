@@ -34,7 +34,6 @@ static void my_touch_read_cb(lv_indev_drv_t * indev_drv, lv_indev_data_t * data)
 	uint16_t current_x = 0;
 	uint16_t current_y = 0;
 
-	printf("LVGL is reading touch...\r\n");
 	bsp_touch_get_xy(&current_x, &current_y, &is_pressed);
 
 	if(is_pressed) {
