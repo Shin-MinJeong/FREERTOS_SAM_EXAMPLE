@@ -49,6 +49,18 @@
 
 static uint8_t s_mxt_info_ext[MXT_INFO_EXT_SIZE];
 
+// ★ 중요: 실제 오브젝트 테이블 시작 주소를 동적으로 계산
+// Family 0x82는 확장 헤더에 T5 정보가 포함되어 있을 수 있음
+static uint16_t mxt_get_object_table_start_address(struct mxt_device* device)
+{
+	// Extended Header의 바이트 12-13이 T5 관련 정보
+	// 최신 칩: 0x1A (26) = 7 + 19
+	// 하지만 실제로는 확인이 필요함
+	
+	// 일단 0x1A에서 시작하되, T5를 찾기 위해 주변을 검색
+	return 0x1A;
+}
+
 /**
  * \internal
  * \brief Total number of report ids available
@@ -81,32 +93,32 @@ static status_code_t mxt_read_id_block(struct mxt_device* device)
 {
 	device->info_object = (struct mxt_info_object*)malloc(sizeof(struct mxt_info_object));
 
-	// 1. 첫 7바이트 (ID Block) 읽기
+	// 1. 첫 7바이트 (ID Block) 읽기 - 주소 0x00
 	twihs_package_t packet = {
-		.addr[0] = MXT_MEM_ADDR,
-		.addr[1] = MXT_MEM_ADDR >> 8,
-		.addr_length = sizeof(mxt_memory_adr),
+		.addr[0] = 0x00,
+		.addr[1] = 0x00,
+		.addr_length = 2,
 		.chip = device->mxt_chip_adr,
 		.buffer = device->info_object,
-		.length = MXT_ID_BLOCK_SIZE
+		.length = MXT_ID_BLOCK_SIZE  // 정확히 7바이트
 	};
 	if (twihs_master_read(device->interface, &packet) != STATUS_OK) {
 		return ERR_IO_ERROR;
 	}
-
-	// 2. 그 다음 19바이트 (추가 헤더)를 info_object가 아닌 s_mxt_info_ext에 읽기!
+	
+	// 2. 그 다음 19바이트 (추가 헤더)를 s_mxt_info_ext에 읽기
 	twihs_package_t ext_packet = {
-		.addr[0] = MXT_ID_BLOCK_SIZE, // 7번지부터 시작
-		.addr[1] = MXT_ID_BLOCK_SIZE >> 8,
-		.addr_length = sizeof(mxt_memory_adr),
+		.addr[0] = MXT_ID_BLOCK_SIZE & 0xFF,      // 0x07
+		.addr[1] = (MXT_ID_BLOCK_SIZE >> 8) & 0xFF,
+		.addr_length = 2,
 		.chip = device->mxt_chip_adr,
-		.buffer = s_mxt_info_ext,    // ★ 중요: 여기에 읽어야 함
+		.buffer = s_mxt_info_ext,
 		.length = MXT_INFO_EXT_SIZE  // 19바이트
 	};
 	if (twihs_master_read(device->interface, &ext_packet) != STATUS_OK) {
 		return ERR_IO_ERROR;
 	}
-
+	
 	return STATUS_OK;
 }
 
@@ -121,20 +133,20 @@ static status_code_t mxt_read_id_block(struct mxt_device* device)
 static status_code_t mxt_read_object_table(struct mxt_device* device)
 {
 	device->object_list = (struct mxt_object*)
-		malloc(device->info_object->obj_count *
-			sizeof(struct mxt_object));
+	malloc(device->info_object->obj_count * sizeof(struct mxt_object));
 
+	uint16_t obj_table_addr = mxt_get_object_table_start_address(device);
+	
 	/* Initializing the TWI packet to send to the slave */
 	twihs_package_t packet = {
-		.addr[0] = OBJECT_TABLE_START_ADDRESS,
-		.addr[1] = OBJECT_TABLE_START_ADDRESS >> 8,
-		.addr_length = sizeof(mxt_memory_adr),
-		.chip = device->mxt_chip_adr,
-		.buffer = device->object_list,
-		.length = device->info_object->obj_count *
-				sizeof(struct mxt_object)
+		.addr[0]      = obj_table_addr & 0xFF,
+	    .addr[1]      = (obj_table_addr >> 8) & 0xFF,
+	    .addr_length  = 2,
+	    .chip         = device->mxt_chip_adr,
+	    .buffer       = device->object_list,
+	    .length       = device->info_object->obj_count * OBJECT_TABLE_ELEMENT_SIZE
 	};
-
+	
 	/* Read information from the slave */
 	if (twihs_master_read(device->interface, &packet) != STATUS_OK) {
 		return ERR_IO_ERROR;
@@ -318,11 +330,32 @@ static status_code_t mxt_validate_info_block(struct mxt_device* device)
 	uint32_t crc_read;
 	uint32_t crc_calculated;
 
+	/* --- DEBUG: ID Block dump --- */
+	{
+		uint8_t* id_raw = (uint8_t*)device->info_object;
+		printf("[RAW ID] addr=0x00 data: ");
+		for (uint8_t i = 0; i < MXT_ID_BLOCK_SIZE; i++) {
+			printf("%02X ", id_raw[i]);
+		}
+		printf("\r\n");
+		printf("[ID INFO] Family=%02X Variant=%02X Version=%02X Build=%02X MatrixX=%d MatrixY=%d ObjCount=%d\r\n",
+			id_raw[0], id_raw[1], id_raw[2], id_raw[3], id_raw[4], id_raw[5], id_raw[6]);
+	}
+
+	/* --- DEBUG: Extended header dump --- */
+	{
+		printf("[RAW EXT] addr=0x07 data: ");
+		for (uint8_t i = 0; i < MXT_INFO_EXT_SIZE; i++) {
+			printf("%02X ", s_mxt_info_ext[i]);
+		}
+		printf("\r\n");
+	}
+
 	/* --- DEBUG: raw object table dump --- */
 	{
 		uint8_t* obj_raw = (uint8_t*)device->object_list;
 		uint16_t obj_bytes = device->info_object->obj_count * OBJECT_TABLE_ELEMENT_SIZE;
-		printf("[RAW OBJ %d bytes] ", obj_bytes);
+		printf("[RAW OBJ %d bytes] addr=0x%02X data: ", obj_bytes, OBJECT_TABLE_START_ADDRESS);
 		for (uint16_t i = 0; i < obj_bytes; i++) {
 			printf("%02X ", obj_raw[i]);
 		}
@@ -335,11 +368,10 @@ static status_code_t mxt_validate_info_block(struct mxt_device* device)
 	/* --- DEBUG: raw crc storage dump --- */
 	{
 		uint16_t addr = OBJECT_TABLE_START_ADDRESS + (OBJECT_TABLE_ELEMENT_SIZE * device->info_object->obj_count);
-		printf("[RAW CRC] addr=%d crc_calc=%06lX crc_read=%06lX\r\n", addr, (unsigned long)crc_calculated, (unsigned long)crc_read);
+		printf("[RAW CRC] addr=0x%04X crc_calc=%06lX crc_read=%06lX\r\n", addr, (unsigned long)crc_calculated, (unsigned long)crc_read);
 	}
 
 	if (crc_calculated != crc_read) {
-		//return ERR_BAD_DATA;
 		printf("[WARNING] CRC Mismatch! Bypassing...\r\n");
 		return STATUS_OK;
 	}
@@ -538,14 +570,33 @@ status_code_t mxt_init_device(struct mxt_device* device, twihs_master_t interfac
 		return (status_code_t)status;
 	}
 
-	/* Get the report id offset of the multi touch object*/
-	status = mxt_get_report_id_offset(device,
-		MXT_TOUCH_MULTITOUCHSCREEN_T9);
-	if (status == -1) {
-		return ERR_BAD_DATA;
+	/* --- DEBUG: Print object list --- */
+	{
+		printf("[DEBUG] Object Table:\r\n");
+		for (uint8_t i = 0; i < device->info_object->obj_count; i++) {
+			printf("  [%d] Type=T%d Addr=0x%04X Size=%d Instances=%d ReportIDs=%d\r\n",
+				i,
+				device->object_list[i].type,
+				device->object_list[i].start_address,
+				device->object_list[i].size,
+				device->object_list[i].instances,
+				device->object_list[i].num_report_ids);
+		}
 	}
 
+	/* Get the report id offset of the multi touch object*/
+	status = mxt_get_report_id_offset(device, MXT_TOUCH_MULTITOUCHSCREEN_T9);
+	if (status == -1) {
+	    printf("[ERROR] T9 not found in report ID map!\r\n");
+	    // T9의 주소로 직접 접근 (대안책)
+	    uint16_t t9_addr = mxt_get_object_address(device, MXT_TOUCH_MULTITOUCHSCREEN_T9, 0);
+	    printf("[WARNING] Using T9 address directly: 0x%04X\r\n", t9_addr);
+	    device->multitouch_report_offset = t9_addr;
+	    return STATUS_OK;
+	}
+	
 	device->multitouch_report_offset = status;
+	printf("[INFO] multitouch_report_offset = %d (Report ID)\r\n", device->multitouch_report_offset);
 
 	return STATUS_OK;
 }

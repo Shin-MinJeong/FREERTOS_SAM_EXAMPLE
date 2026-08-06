@@ -18,8 +18,7 @@
 
 #define MXT_TWI_INSTANCE              TWIHS0
 #define MXT_TWI_ID                    ID_TWIHS0
-#define MAXTOUCH_XPRO_CHG_PIO		  PIO_PA2_IDX
-#define MXT_RESET_PIN                 IOPORT_CREATE_PIN(PIOC, 12)
+#define MXT_RESET_PIN                 IOPORT_CREATE_PIN(PIOC, 13)
 #define MXT_INTERRUPT_PIN			  IOPORT_CREATE_PIN(PIOD, 28)
 #define MXT_I2C_ADDRESS               0x4A
 #define MXT_MSG_REG					  0x05
@@ -35,7 +34,7 @@
 extern struct mxt_device device;
 extern bool g_touch_ready;
 
-//void bsp_touch_init(struct mxt_device *device);
+void bsp_touch_init(struct mxt_device *device);
 void bsp_touch_get_xy(uint16_t *x, uint16_t *y, bool *pressed);
 
 
