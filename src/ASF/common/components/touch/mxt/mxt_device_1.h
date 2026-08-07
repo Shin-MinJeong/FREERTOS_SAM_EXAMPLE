@@ -47,7 +47,7 @@ extern "C" {
 #include "conf_mxt.h"
 
 
-#define MXT_MAX_MSG_SIZE       7
+#define MXT_MAX_MSG_SIZE       10
 #define MXT_TWI_MSG_SIZE_T5    MXT_MAX_MSG_SIZE + 2
 #define MXT_RESET_TIME         65
 

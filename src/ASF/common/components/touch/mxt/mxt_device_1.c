@@ -41,7 +41,7 @@
 
 #define  OBJECT_TABLE_ELEMENT_SIZE  6
 #define  MXT_ID_BLOCK_SIZE          7   
-#define  MXT_INFO_EXT_SIZE          19  
+#define  MXT_INFO_EXT_SIZE          1
 #define  OBJECT_TABLE_START_ADDRESS (MXT_ID_BLOCK_SIZE + MXT_INFO_EXT_SIZE)
 #define  MXT_MEM_ADDR               0x00
 #define  MXT_FAMILY_143E            0x81
@@ -58,7 +58,7 @@ static uint16_t mxt_get_object_table_start_address(struct mxt_device* device)
 	// 하지만 실제로는 확인이 필요함
 	
 	// 일단 0x1A에서 시작하되, T5를 찾기 위해 주변을 검색
-	return 0x1A;
+	return 0x08;
 }
 
 /**
@@ -192,8 +192,7 @@ static status_code_t mxt_create_report_id_map(struct mxt_device* device)
 	uint8_t tot_report_ids = mxt_get_tot_report_ids(device);
 
 	device->report_id_map = (struct mxt_report_id_map*)
-		malloc(sizeof(struct mxt_report_id_map) *
-			tot_report_ids);
+    malloc(sizeof(struct mxt_report_id_map) * (tot_report_ids + 1));
 
 	/* For every object */
 	for (i = 0; i < device->info_object->obj_count; ++i) {
@@ -831,16 +830,12 @@ status_code_t mxt_read_message(struct mxt_device* device,
 
 	/* Initializing the TWI packet to send to the slave */
 	twihs_package_t packet = {
-		.addr[0] = obj_adr,
-#ifdef CONF_VALIDATE_MESSAGES
-		.addr[1] = (obj_adr >> 8) | 0x80,
-#else
-		.addr[1] = obj_adr >> 8,
-#endif
-		.addr_length = sizeof(mxt_memory_adr),
+		.addr[0] = obj_adr & 0xFF,
+		.addr[1] = (obj_adr >> 8) & 0xFF,  
+		.addr_length = 2,
 		.chip = device->mxt_chip_adr,
 		.buffer = message,
-		.length = MXT_TWI_MSG_SIZE_T5
+		.length = mxt_get_object_size(device, obj_adr)
 	};
 
 	/* Read information from the slave */
