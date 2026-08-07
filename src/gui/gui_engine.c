@@ -37,12 +37,13 @@ static void my_touch_read_cb(lv_indev_drv_t * indev_drv, lv_indev_data_t * data)
 	bsp_touch_get_xy(&current_x, &current_y, &is_pressed);
 
 	if(is_pressed) {
-		last_x = current_x;
-		last_y = current_y;
+		last_x = (current_x * ILI9488_LCD_WIDTH) / TOUCH_MAX_X;
+        last_y = (current_y * ILI9488_LCD_HEIGHT) / TOUCH_MAX_Y;
+		
 		data->point.x = last_x;
 		data->point.y = last_y;
 		data->state = LV_INDEV_STATE_PR;
-		printf("[LVGL Touch] X: %d, Y: %d\r\n", last_x, last_y);
+		printf("[LVGL] X: %d, Y: %d\r\n", last_x, last_y);
 	} else {
 		data->point.x = last_x;
 		data->point.y = last_y;

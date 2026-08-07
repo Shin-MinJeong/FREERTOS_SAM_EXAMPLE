@@ -11,6 +11,11 @@
 
 #include "main.h"
 
+#define TOUCH_RAW_DUMP   0
+
+#define TOUCH_MAX_X 4095 
+#define TOUCH_MAX_Y 4095
+
 #define MAXTOUCH_TWI_INTERFACE           MAXTOUCH_XPRO_TWIHS
 #define MAXTOUCH_TWI_ADDRESS             0x4A
 #define MAXTOUCH_XPRO_TWIHS				 TWIHS0

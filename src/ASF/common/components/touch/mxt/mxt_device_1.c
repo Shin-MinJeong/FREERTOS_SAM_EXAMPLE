@@ -41,24 +41,27 @@
 
 #define  OBJECT_TABLE_ELEMENT_SIZE  6
 #define  MXT_ID_BLOCK_SIZE          7   
-#define  MXT_INFO_EXT_SIZE          1
-#define  OBJECT_TABLE_START_ADDRESS (MXT_ID_BLOCK_SIZE + MXT_INFO_EXT_SIZE)
+#define  MXT_INFO_EXT_SIZE          1   
+#define  OBJECT_TABLE_START_ADDRESS (MXT_ID_BLOCK_SIZE)   
 #define  MXT_MEM_ADDR               0x00
 #define  MXT_FAMILY_143E            0x81
 #define  MXT_VARIANT_143E           0x07
 
 static uint8_t s_mxt_info_ext[MXT_INFO_EXT_SIZE];
 
-// ★ 중요: 실제 오브젝트 테이블 시작 주소를 동적으로 계산
-// Family 0x82는 확장 헤더에 T5 정보가 포함되어 있을 수 있음
 static uint16_t mxt_get_object_table_start_address(struct mxt_device* device)
 {
-	// Extended Header의 바이트 12-13이 T5 관련 정보
-	// 최신 칩: 0x1A (26) = 7 + 19
-	// 하지만 실제로는 확인이 필요함
-	
-	// 일단 0x1A에서 시작하되, T5를 찾기 위해 주변을 검색
-	return 0x08;
+	(void)device;
+	return MXT_ID_BLOCK_SIZE;
+}
+
+static inline void mxt_twi_flush(Twihs *p_twihs)
+{
+	volatile uint32_t dummy;
+	while (p_twihs->TWIHS_SR & TWIHS_SR_RXRDY) {
+		dummy = p_twihs->TWIHS_RHR;
+		(void)dummy;
+	}
 }
 
 /**
@@ -93,35 +96,22 @@ static status_code_t mxt_read_id_block(struct mxt_device* device)
 {
 	device->info_object = (struct mxt_info_object*)malloc(sizeof(struct mxt_info_object));
 
-	// 1. 첫 7바이트 (ID Block) 읽기 - 주소 0x00
 	twihs_package_t packet = {
 		.addr[0] = 0x00,
 		.addr[1] = 0x00,
 		.addr_length = 2,
 		.chip = device->mxt_chip_adr,
 		.buffer = device->info_object,
-		.length = MXT_ID_BLOCK_SIZE  // 정확히 7바이트
+		.length = MXT_ID_BLOCK_SIZE
 	};
+
+	mxt_twi_flush(device->interface);
 	if (twihs_master_read(device->interface, &packet) != STATUS_OK) {
 		return ERR_IO_ERROR;
 	}
-	
-	// 2. 그 다음 19바이트 (추가 헤더)를 s_mxt_info_ext에 읽기
-	twihs_package_t ext_packet = {
-		.addr[0] = MXT_ID_BLOCK_SIZE & 0xFF,      // 0x07
-		.addr[1] = (MXT_ID_BLOCK_SIZE >> 8) & 0xFF,
-		.addr_length = 2,
-		.chip = device->mxt_chip_adr,
-		.buffer = s_mxt_info_ext,
-		.length = MXT_INFO_EXT_SIZE  // 19바이트
-	};
-	if (twihs_master_read(device->interface, &ext_packet) != STATUS_OK) {
-		return ERR_IO_ERROR;
-	}
-	
+
 	return STATUS_OK;
 }
-
 /**
  * \internal
  * \brief Read out the object table from the maXTouch device and
@@ -148,6 +138,7 @@ static status_code_t mxt_read_object_table(struct mxt_device* device)
 	};
 	
 	/* Read information from the slave */
+	mxt_twi_flush(device->interface);
 	if (twihs_master_read(device->interface, &packet) != STATUS_OK) {
 		return ERR_IO_ERROR;
 	}
@@ -308,6 +299,7 @@ static uint32_t mxt_get_crc_value(struct mxt_device* device)
 	};
 
 	/* Read information from the slave */
+	mxt_twi_flush(device->interface);
 	if (twihs_master_read(device->interface, &packet) != STATUS_OK) {
 		return ERR_IO_ERROR;
 	}
@@ -515,6 +507,7 @@ status_code_t mxt_probe_device(twihs_master_t interface, uint8_t chip_adr)
 	};
 
 	/* Read information from the slave */
+	mxt_twi_flush(interface);
 	status = twihs_master_read(interface, &packet);
 	if (status != TWIHS_SUCCESS) {
 		return (status_code_t)status;
@@ -643,6 +636,7 @@ status_code_t mxt_read_config_object(struct mxt_device* device,
 		.length = mxt_get_object_size(device, memory_adr)
 	};
 
+	mxt_twi_flush(device->interface);
 	if (twihs_master_read(device->interface, &packet) != STATUS_OK) {
 		return ERR_IO_ERROR;
 	}
@@ -673,6 +667,7 @@ status_code_t mxt_read_config_reg(struct mxt_device* device,
 		.length = sizeof(uint8_t)
 	};
 
+	mxt_twi_flush(device->interface);
 	if (twihs_master_read(device->interface, &packet) != STATUS_OK) {
 		return ERR_IO_ERROR;
 	}
@@ -807,6 +802,7 @@ int8_t mxt_get_message_count(struct mxt_device* device)
 	};
 
 	/* Read information from the slave */
+	mxt_twi_flush(device->interface);
 	if (twihs_master_read(device->interface, &packet) != STATUS_OK) {
 		return ERR_IO_ERROR;
 	}
@@ -839,6 +835,7 @@ status_code_t mxt_read_message(struct mxt_device* device,
 	};
 
 	/* Read information from the slave */
+	mxt_twi_flush(device->interface);
 	if (twihs_master_read(device->interface, &packet) != STATUS_OK) {
 		return ERR_IO_ERROR;
 	}

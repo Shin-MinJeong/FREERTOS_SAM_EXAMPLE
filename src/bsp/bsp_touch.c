@@ -9,6 +9,31 @@
 
 bool g_touch_ready = false;
 
+static inline void mxt_twi_flush(Twihs *p_twihs)
+{
+	volatile uint32_t dummy;
+	while (p_twihs->TWIHS_SR & TWIHS_SR_RXRDY) {
+		dummy = p_twihs->TWIHS_RHR;
+		(void)dummy;
+	}
+}
+
+static enum status_code mxt_raw_read(struct mxt_device *dev, uint16_t addr,
+                                     uint8_t *buf, uint16_t len)
+{
+	twihs_package_t packet = {
+		.addr[0]     = addr & 0xFF,
+		.addr[1]     = (addr >> 8) & 0xFF,
+		.addr_length = 2,
+		.chip        = dev->mxt_chip_adr,
+		.buffer      = buf,
+		.length      = len
+	};
+	mxt_twi_flush(dev->interface);
+	return (twihs_master_read(dev->interface, &packet) == TWIHS_SUCCESS)
+	        ? STATUS_OK : ERR_IO_ERROR;
+}
+
 void bsp_touch_init(struct mxt_device *device)
 {
 	enum status_code status;
@@ -16,7 +41,10 @@ void bsp_touch_init(struct mxt_device *device)
 	uint8_t t8_object[] = { 0x0d, 0x00, 0x05, 0x0a, 0x4b, 0x00, 0x00, 0x00, 0x32, 0x19 };
 	uint8_t t9_object[] = {
 		0x8B, 0x00, 0x00, 0x0E, 0x08, 0x00, 0x80, 0x14, 0x05, 0x02, 0x0A, 0x03, 0x03, 0x20,
-		0x02, 0x0F, 0x0F, 0x0A, 0x00, 0x00, 0x00, 0x00, 0x18, 0x18, 0x20, 0x20, 0x00, 0x00,
+		0x02, 0x0F, 0x0F, 0x0A,
+		0xFF, 0x03,          /* [18][19] XRANGE = 1023 */
+		0xFF, 0x03,          /* [20][21] YRANGE = 1023 */
+		0x18, 0x18, 0x20, 0x20, 0x00, 0x00,
 		0x00, 0x00, 0x00, 0x0A, 0x00, 0x00, 0x02, 0x02
 	};
 	uint8_t t46_object[] = { 0x00, 0x00, 0x18, 0x18, 0x00, 0x00, 0x03, 0x00, 0x00 };
@@ -59,8 +87,25 @@ void bsp_touch_init(struct mxt_device *device)
 	mxt_write_config_object(device, mxt_get_object_address(device, MXT_SPT_CTE_CONFIGURATION_T46, 0), t46_object);
 	mxt_write_config_object(device, mxt_get_object_address(device, MXT_PROCI_SHIELDLESS_T56, 0), t56_object);
 	
-	mxt_write_config_reg(device, mxt_get_object_address(device, MXT_GEN_COMMANDPROCESSOR_T6, 0) + 1 /* BACKUPNV */, 0x55);
-	delay_ms(200);
+	uint16_t t42_addr = mxt_get_object_address(device, 42, 0);
+	mxt_write_config_reg(device, t42_addr + 0, 0x00);  
+	
+	uint16_t t6_base = mxt_get_object_address(device, MXT_GEN_COMMANDPROCESSOR_T6, 0);
+
+	mxt_write_config_reg(device, t6_base + MXT_GEN_COMMANDPROCESSOR_BACKUPNV, 0x55);
+	
+	uint8_t backup_status = 0xFF;
+	for (int retry = 0; retry < 50; retry++) {
+	    delay_ms(20);
+	    mxt_read_config_reg(device, t6_base + MXT_GEN_COMMANDPROCESSOR_BACKUPNV, &backup_status);  // 같은 레지스터를 다시 읽어야 함
+	    if (backup_status == 0x00) {
+	        printf("[BACKUPNV] completed after %dms\r\n", (retry+1)*20);
+	        break;
+	    }
+	}
+	if (backup_status != 0x00) {
+	    printf("[WARNING] BACKUPNV did not clear! last=0x%02X\r\n", backup_status);
+	}
 
 	mxt_write_config_reg(device, mxt_get_object_address(device, MXT_GEN_COMMANDPROCESSOR_T6, 0) + MXT_GEN_COMMANDPROCESSOR_CALIBRATE, 0x01);
 	delay_ms(200);
@@ -72,44 +117,52 @@ void bsp_touch_init(struct mxt_device *device)
 
 void bsp_touch_get_xy(uint16_t *x, uint16_t *y, bool *pressed)
 {
-    *pressed = false; 
-	
+	*pressed = false;
+
 	if (!g_touch_ready) {
-		printf("[DBG] not ready, g_touch_ready = false! \r\n"); 
-        return;
-    }
-	
-    struct mxt_conf_messageprocessor_t5 msg;
-    memset(&msg, 0, sizeof(msg)); 
-    
-    bool found_touch = false;
+		return;
+	}
 
-    for (int i = 0; i < 10; i++) {
-        if (mxt_read_message(&device, &msg) != STATUS_OK) {
-            break; 
-        }
+	uint16_t t5_addr = mxt_get_object_address(&device, MXT_GEN_MESSAGEPROCESSOR_T5, 0);
+	uint8_t  t5_size = 11;                
+	uint8_t  raw[16];
+
+	for (int i = 0; i < 10; i++) {
+
+		memset(raw, 0, sizeof(raw));
 		
-        if (msg.reportid == 0xFF) {
-            break;
-        }
+		if (mxt_raw_read(&device, t5_addr, raw, t5_size) != STATUS_OK) {
+			break;
+		}
 
-        if (msg.reportid >= device.multitouch_report_offset &&
-            msg.reportid < device.multitouch_report_offset + 4) {
+		if (raw[0] == 0xFF) {            
+			break;
+		}
 
-            uint8_t touch_status = msg.message[0];
+#if TOUCH_RAW_DUMP
+		printf("[T5 RAW] %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X\r\n",
+		       raw[0], raw[1], raw[2], raw[3], raw[4], raw[5],
+		       raw[6], raw[7], raw[8], raw[9], raw[10]);
+#endif
 
-            if (touch_status != 0) {
-                *pressed = (touch_status & 0x80) ? true : false; // DETECT 비트 확인
-                *x = (msg.message[1] << 4) | ((msg.message[3] >> 4) & 0x0F);
-                *y = (msg.message[2] << 4) | (msg.message[3] & 0x0F);
-                found_touch = true;
-                
-                printf("[LVGL Touch] Status: 0x%02X, X: %d, Y: %d\r\n", touch_status, *x, *y);
+		uint8_t rid = raw[0];
+
+		if (rid >= device.multitouch_report_offset && rid <  device.multitouch_report_offset + 4) {
+
+			uint8_t  status = raw[1];
+			uint16_t px = ((uint16_t)raw[2] << 4) | (raw[4] >> 4);
+			uint16_t py = ((uint16_t)raw[3] << 4) | (raw[4] & 0x0F);
+
+			if (status & 0x80) {           /* DETECT */
+				*pressed = true;
+				*x = px;
+				*y = py;
 			}
-        }
+			printf("[Touch] id=%u st=0x%02X X=%u Y=%u amp=%u\r\n", rid, status, px, py, raw[6]);
+		}
 
-        if (!mxt_is_message_pending(&device)) {
-            break;
-        }
-    }
+		if (!mxt_is_message_pending(&device)) {
+			break;
+		}
+	}
 }
