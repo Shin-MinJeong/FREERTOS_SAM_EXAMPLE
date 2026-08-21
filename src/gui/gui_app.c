@@ -1,110 +1,93 @@
-﻿/*
- * gui_app.c
- *
- * Created: 2026-07-09 오전 9:00:05
- *  Author: USER
- */ 
-
-#include "main.h"
+﻿#include "main.h"
 #define IMG_COUNT   10
 
-static void my_btn_event_cb(lv_event_t * e)
-{
-    lv_event_code_t code = lv_event_get_code(e);
-    lv_obj_t * btn = lv_event_get_target(e);
+/* 변환된 이미지 선언 */
+LV_IMG_DECLARE(cat1);  LV_IMG_DECLARE(cat2);
+LV_IMG_DECLARE(cat3);  LV_IMG_DECLARE(cat4);
+LV_IMG_DECLARE(cat5);  LV_IMG_DECLARE(cat6);
+LV_IMG_DECLARE(cat7);  LV_IMG_DECLARE(cat8);
+LV_IMG_DECLARE(cat9);  LV_IMG_DECLARE(cat10);
 
-    if(code == LV_EVENT_VALUE_CHANGED) {
-        lv_obj_t * label = lv_obj_get_child(btn, 0); 
-        if(label != NULL) {
-            if(lv_obj_has_state(btn, LV_STATE_CHECKED)) {
-                printf("Button Ouch!\r\n");
-                lv_label_set_text(label, "Ouch!"); 
-            } else {
-                printf("Button Click Me\r\n");
-                lv_label_set_text(label, "Click Me"); 
-            }
-        }
+typedef struct {
+    const char *         name;
+    const lv_img_dsc_t * dsc;
+} img_item_t;
+
+static const img_item_t img_table[IMG_COUNT] = {
+    { "Cat1",  &cat1  },  { "Cat2",  &cat2  },
+    { "Cat3",  &cat3  },  { "Cat4",  &cat4  },
+    { "Cat5",  &cat5  },  { "Cat6",  &cat6  },
+    { "Cat7",  &cat7  },  { "Cat8",  &cat8  },
+    { "Cat9",  &cat9  },  { "Cat10", &cat10 },
+};
+
+static lv_obj_t * g_scr_list = NULL;   /* 리스트 화면 */
+static lv_obj_t * g_scr_view = NULL;   /* 이미지 화면 */
+static lv_obj_t * g_img      = NULL;
+static lv_obj_t * g_title    = NULL;
+
+/* 뒤로가기 */
+static void back_event_cb(lv_event_t * e)
+{
+    lv_scr_load(g_scr_list);
+}
+
+/* 리스트 항목 클릭 */
+static void list_btn_event_cb(lv_event_t * e)
+{
+    uint32_t idx = (uint32_t)(uintptr_t)lv_event_get_user_data(e);
+    if (idx >= IMG_COUNT) return;
+
+    lv_img_set_src(g_img, img_table[idx].dsc);
+    lv_label_set_text(g_title, img_table[idx].name);
+    lv_scr_load(g_scr_view);
+
+    printf("[LIST] idx=%lu, %s\r\n", (unsigned long)idx, img_table[idx].name);
+}
+
+static void create_list_screen(void)
+{
+    g_scr_list = lv_obj_create(NULL);
+    lv_obj_set_style_bg_color(g_scr_list, lv_color_hex(0xE0E0E0), 0);
+
+    lv_obj_t * list = lv_list_create(g_scr_list);
+    lv_obj_set_size(list, ILI9488_LCD_WIDTH - 20, ILI9488_LCD_HEIGHT - 20);
+    lv_obj_center(list);
+
+    lv_list_add_text(list, "Images");
+
+    for (uint32_t i = 0; i < IMG_COUNT; i++) {
+        lv_obj_t * btn = lv_list_add_btn(list, LV_SYMBOL_IMAGE, img_table[i].name);
+        lv_obj_add_event_cb(btn, list_btn_event_cb, LV_EVENT_CLICKED,
+                            (void *)(uintptr_t)i);
     }
 }
 
-void draw_dot_cat(uint32_t start_x, uint32_t start_y, uint32_t pixel_size)
+static void create_view_screen(void)
 {
-	const uint8_t cat_map[16][16] = {
-		{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-		{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-		{0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0},
-		{0,0,1,1,0,0,0,0,0,0,0,1,1,0,0,0},
-		{0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0},
-		{0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0},
-		{0,1,1,0,1,1,1,1,1,1,1,0,1,1,0,0},
-		{0,1,1,1,1,1,1,0,1,1,1,1,1,1,0,0},
-		{0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0},
-		{0,0,0,1,1,1,1,1,1,1,1,1,0,0,1,1},
-		{0,0,0,1,1,1,1,1,1,1,1,1,0,1,1,0},
-		{0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0},
-		{0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0},
-		{0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0},
-		{0,0,0,1,1,0,1,1,0,1,1,0,0,0,0,0},
-		{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
-	};
+    g_scr_view = lv_obj_create(NULL);
+    lv_obj_set_style_bg_color(g_scr_view, lv_color_hex(0x202020), 0);
 
-	ili9488_set_foreground_color(COLOR_CONVERT(COLOR_BLACK));
+    g_title = lv_label_create(g_scr_view);
+    lv_obj_set_style_text_color(g_title, lv_color_hex(0xFFFFFF), 0);
+    lv_obj_align(g_title, LV_ALIGN_TOP_MID, 0, 10);
 
-	for (int y = 0; y < 16; y++) {
-		for (int x = 0; x < 16; x++) {
-			if (cat_map[y][x] == 1) {
-				ili9488_draw_filled_rectangle(
-				start_x + (x * pixel_size),
-				start_y + (y * pixel_size),
-				start_x + (x * pixel_size) + pixel_size,
-				start_y + (y * pixel_size) + pixel_size
-				);
-			}
-		}
-	}
+    g_img = lv_img_create(g_scr_view);
+    lv_obj_center(g_img);
 
-	ili9488_set_foreground_color(COLOR_CONVERT(COLOR_GREEN));
-	ili9488_draw_filled_rectangle(start_x + (3 * pixel_size), start_y + (6 * pixel_size), start_x + (3 * pixel_size) + pixel_size, start_y + (6 * pixel_size) + pixel_size);
-	ili9488_draw_filled_rectangle(start_x + (11 * pixel_size), start_y + (6 * pixel_size), start_x + (11 * pixel_size) + pixel_size, start_y + (6 * pixel_size) + pixel_size);
-}
+    lv_obj_t * back = lv_btn_create(g_scr_view);
+    lv_obj_set_size(back, 100, 45);
+    lv_obj_align(back, LV_ALIGN_BOTTOM_MID, 0, -10);
+    lv_obj_add_event_cb(back, back_event_cb, LV_EVENT_CLICKED, NULL);
 
-/* 나중에 실제 이미지 디스크립터로 교체할 자리 */
-static const char * img_names[IMG_COUNT] = {
-    "Sunrise",  "Mountain", "Ocean",   "Forest",  "Desert",
-    "City",     "Bridge",   "Flower",  "Cat",     "Robot"
-};
-
-static lv_obj_t * g_list = NULL;
-
-static void list_btn_event_cb(lv_event_t * e)
-{
-    lv_event_code_t code = lv_event_get_code(e);
-    lv_obj_t * btn = lv_event_get_target(e);
-
-    if(code != LV_EVENT_CLICKED) return;
-
-    /* 등록 시 넣어둔 인덱스 회수 */
-    uint32_t idx = (uint32_t)(uintptr_t)lv_event_get_user_data(e);
-    const char * txt = lv_list_get_btn_text(g_list, btn);
-
-    printf("[LIST] idx=%lu, text=%s\r\n", (unsigned long)idx, txt);
-
-    /* TODO: 여기서 idx 로 이미지 전환 */
+    lv_obj_t * lbl = lv_label_create(back);
+    lv_label_set_text(lbl, LV_SYMBOL_LEFT " Back");
+    lv_obj_center(lbl);
 }
 
 void gui_app_create_ui(void)
 {
-    lv_obj_set_style_bg_color(lv_scr_act(), lv_color_hex(0xE0E0E0), 0);
-
-    g_list = lv_list_create(lv_scr_act());
-    lv_obj_set_size(g_list, 280, 200);
-    lv_obj_center(g_list);
-
-    /* 헤더 (선택). 버튼 아님 — 클릭 대상 아님 */
-    lv_list_add_text(g_list, "Images");
-
-    for(uint32_t i = 0; i < IMG_COUNT; i++) {
-        lv_obj_t * btn = lv_list_add_btn(g_list, LV_SYMBOL_IMAGE, img_names[i]);
-        lv_obj_add_event_cb(btn, list_btn_event_cb, LV_EVENT_CLICKED, (void *)(uintptr_t)i);
-    }
+    create_list_screen();
+    create_view_screen();
+    lv_scr_load(g_scr_list);
 }

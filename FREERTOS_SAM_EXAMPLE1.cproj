@@ -819,6 +819,7 @@
     <Folder Include="src\lvgl\src\widgets\" />
     <Folder Include="src\bsp" />
     <Folder Include="src\gui" />
+    <Folder Include="src\image" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="src\ASF\common\components\touch\mxt\mxt_device_1.c">
@@ -885,6 +886,36 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\gui\include\gui_engine.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\image\cat1.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\image\cat10.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\image\cat2.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\image\cat3.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\image\cat4.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\image\cat5.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\image\cat6.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\image\cat7.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\image\cat8.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\image\cat9.c">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\main.h">
