@@ -13,6 +13,8 @@
 
 static lv_disp_draw_buf_t draw_buf;
 static lv_color_t buf1[LCD_BUF_SIZE];
+static volatile uint16_t g_tx = 0, g_ty = 0;
+static volatile bool     g_tp = false;
 
 /* LVGL -> ILI9488 데이터 전송 콜백 함수 */
 static void my_lcd_flush_cb(lv_disp_drv_t * disp_drv, const lv_area_t * area, lv_color_t * color_p)
@@ -29,17 +31,34 @@ static void my_lcd_flush_cb(lv_disp_drv_t * disp_drv, const lv_area_t * area, lv
     lv_disp_flush_ready(disp_drv);
 }
 
+static void task_touch(void *pvParameters)
+{
+    for (;;) {
+        uint16_t rx = 0, ry = 0;
+        bool     pressed = false;
+
+        bsp_touch_get_xy(&rx, &ry, &pressed);
+
+        taskENTER_CRITICAL();
+        g_tx = rx;  g_ty = ry;  g_tp = pressed;
+        taskEXIT_CRITICAL();
+
+        vTaskDelay(pdMS_TO_TICKS(10));
+    }
+}
+
 static void my_touch_read_cb(lv_indev_drv_t * indev_drv, lv_indev_data_t * data)
 {
     static int16_t last_x = 0, last_y = 0;
-    bool     is_pressed = false;
-    uint16_t rx = 0, ry = 0;
+    uint16_t rx, ry;
+    bool     is_pressed;
 
-    bsp_touch_get_xy(&rx, &ry, &is_pressed);
+    taskENTER_CRITICAL();
+    rx = g_tx;  ry = g_ty;  is_pressed = g_tp;
+    taskEXIT_CRITICAL();
 
     if (is_pressed) {
         uint16_t tx = rx, ty = ry;
-
 #if TOUCH_SWAP_XY
         uint16_t tmp = tx; tx = ty; ty = tmp;
 #endif
@@ -49,7 +68,6 @@ static void my_touch_read_cb(lv_indev_drv_t * indev_drv, lv_indev_data_t * data)
 #if TOUCH_INV_Y
         ty = TOUCH_MAX_Y - 1 - ty;
 #endif
-
         last_x = (int16_t)(((uint32_t)tx * ILI9488_LCD_WIDTH)  / TOUCH_MAX_X);
         last_y = (int16_t)(((uint32_t)ty * ILI9488_LCD_HEIGHT) / TOUCH_MAX_Y);
 
@@ -97,4 +115,8 @@ void gui_engine_task_create(void)
 	if (xTaskCreate(task_lcd, "Lcd", TASK_LCD_STACK_SIZE, NULL, TASK_LCD_STACK_PRIORITY, NULL) != pdPASS) {
 		// 태스크 생성 실패 예외 처리
 	}
+	
+	if (xTaskCreate(task_touch, "Touch", 512, NULL, TASK_LCD_STACK_PRIORITY + 1, NULL) != pdPASS) {
+		// 태스크 생성 실패 예외 처리
+    }
 }

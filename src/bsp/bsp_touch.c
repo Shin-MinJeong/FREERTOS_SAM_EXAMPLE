@@ -7,6 +7,13 @@
 
 #include "main.h"
 
+#define MXT_T9_DETECT    0x80
+#define MXT_T9_RELEASE   0x20
+#define MXT_T9_SUPPRESS  0x02
+
+static uint8_t  g_t5_size = 11;
+
+
 bool g_touch_ready = false;
 
 static inline void mxt_twi_flush(Twihs *p_twihs)
@@ -37,9 +44,9 @@ void bsp_touch_init(struct mxt_device *device)
 {
 	enum status_code status;
 
-	uint8_t t8_object[] = { 0x0d, 0x00, 0x05, 0x0a, 0x4b, 0x00, 0x00, 0x00, 0x32, 0x19 };
+	uint8_t t8_object[] = { 0x0d, 0x00, 0x05, 0x0a, 0x4b, 0x00, 0x00, 0x00, 0x00, 0x00 };
 	uint8_t t9_object[] = {
-		0x8B, 0x00, 0x00, 0x0E, 0x08, 0x00, 0x80, 0x14, 0x05, 0x02, 0x0A, 0x03, 0x03, 0x20,
+		0x8B, 0x00, 0x00, 0x0E, 0x08, 0x00, 0x80, 0x0A, 0x03, 0x02, 0x0A, 0x03, 0x03, 0x20,
 		0x02, 0x0F, 0x0F, 0x0A,
 		0xFF, 0x03,          /* [18][19] XRANGE = 1023 */
 		0xFF, 0x03,          /* [20][21] YRANGE = 1023 */
@@ -79,7 +86,7 @@ void bsp_touch_init(struct mxt_device *device)
 	mxt_write_config_reg(device, mxt_get_object_address(device, MXT_GEN_POWERCONFIG_T7, 0) + 0, 0x20);
 	mxt_write_config_reg(device, mxt_get_object_address(device, MXT_GEN_POWERCONFIG_T7, 0) + 1, 0x10);
 	mxt_write_config_reg(device, mxt_get_object_address(device, MXT_GEN_POWERCONFIG_T7, 0) + 2, 0x4b);
-	mxt_write_config_reg(device, mxt_get_object_address(device, MXT_GEN_POWERCONFIG_T7, 0) + 3, 0x84);
+	//mxt_write_config_reg(device, mxt_get_object_address(device, MXT_GEN_POWERCONFIG_T7, 0) + 3, 0x84);
 
 	mxt_write_config_object(device, mxt_get_object_address(device, MXT_GEN_ACQUISITIONCONFIG_T8, 0), t8_object);
 	mxt_write_config_object(device, mxt_get_object_address(device, MXT_TOUCH_MULTITOUCHSCREEN_T9, 0), t9_object);
@@ -109,39 +116,91 @@ void bsp_touch_init(struct mxt_device *device)
 	mxt_write_config_reg(device, mxt_get_object_address(device, MXT_GEN_COMMANDPROCESSOR_T6, 0) + MXT_GEN_COMMANDPROCESSOR_CALIBRATE, 0x01);
 	delay_ms(200);
 	
-	device->multitouch_report_offset = 2;
+	//device->multitouch_report_offset = 2;
+	uint8_t id = 1; 
+    for (uint8_t i = 0; i < device->info_object->obj_count; i++) {
+        if (device->object_list[i].num_report_ids == 0) continue;
+
+        if (device->object_list[i].type == MXT_TOUCH_MULTITOUCHSCREEN_T9) {
+            device->multitouch_report_offset = id;
+            break;
+        }
+        id += device->object_list[i].num_report_ids * (device->object_list[i].instances + 1);
+    }
+    printf("[MXT] T9 report id base = %d\r\n", device->multitouch_report_offset);
+	
 	g_touch_ready = true;
 	printf("[INFO] touch ready!\r\n");
 }
 
 void bsp_touch_get_xy(uint16_t *x, uint16_t *y, bool *pressed)
 {
-	static bool     s_pressed = false;
-	static uint16_t s_x = 0, s_y = 0;
+    static bool     s_pressed = false;
+    static uint16_t s_x = 0, s_y = 0;
+    static bool     s_release_pending = false;
+    static bool     s_press_pending   = false;
+    static uint16_t s_pending_x = 0, s_pending_y = 0;
+    static uint32_t s_last_evt = 0;
 
-	if (!g_touch_ready) { *pressed = false; return; }
+    *x = s_x;  *y = s_y;  *pressed = false;
+    if (!g_touch_ready) return;
 
-	uint16_t t5_addr = mxt_get_object_address(&device, MXT_GEN_MESSAGEPROCESSOR_T5, 0);
-	uint8_t  raw[16];
+    if (s_release_pending) {
+        s_release_pending = false;
+        s_pressed = false;
+        return;
+    }
+    if (s_press_pending) {
+        s_press_pending = false;
+        s_x = s_pending_x;  s_y = s_pending_y;
+        s_pressed = true;
+        s_last_evt = xTaskGetTickCount();
+        *x = s_x;  *y = s_y;  *pressed = true;
+        return;
+    }
 
-	for (int i = 0; i < 10; i++) {
-		if (mxt_raw_read(&device, t5_addr, raw, 11) != STATUS_OK) break;
-		if (raw[0] == 0xFF) break;
+    struct mxt_conf_messageprocessor_t5 msg;
+    bool    pressed_in_this_cycle = false;
+    uint8_t base = (uint8_t)device.multitouch_report_offset;
 
-		if (raw[0] == device.multitouch_report_offset) {
-			uint8_t status = raw[1];
-			if (status & MXT_DETECT_EVENT) {
-				s_x = ((uint16_t)raw[2] << 4) | (raw[4] >> 4);
-				s_y = ((uint16_t)raw[3] << 4) | (raw[4] & 0x0F);
-				s_pressed = true;
-			} else {                    
-				s_pressed = false;
-			}
-		}
-		if (!mxt_is_message_pending(&device)) break;
-	}
+    while (mxt_is_message_pending(&device)) {
+        if (mxt_read_message(&device, &msg) != STATUS_OK) break;
+        if (msg.reportid != base) continue;
 
-	*pressed = s_pressed;
-	*x = s_x;
-	*y = s_y;
+        uint8_t  status = msg.message[0];
+        uint16_t nx = ((uint16_t)msg.message[1] << 4) | (msg.message[3] >> 4);
+        uint16_t ny = ((uint16_t)msg.message[2] << 4) | (msg.message[3] & 0x0F);
+
+        s_last_evt = xTaskGetTickCount();
+
+        if (status & MXT_SUPPRESS_EVENT) {
+            s_pressed = false;
+        }
+        else if (status & MXT_DETECT_EVENT) {
+            if ((status & MXT_PRESS_EVENT) && s_pressed) {
+                s_pressed       = false;
+                s_press_pending = true;
+                s_pending_x = nx;  s_pending_y = ny;
+                break;
+            }
+            s_x = nx;  s_y = ny;
+            if (!s_pressed) pressed_in_this_cycle = true;
+            s_pressed = true;
+        }
+        else if (status & MXT_RELEASE_EVENT) {
+            if (pressed_in_this_cycle) { s_release_pending = true; break; }
+            s_pressed = false;
+        }
+    }
+
+    /* 와치독: 200ms간 T9 이벤트 없으면 강제 릴리스 + 상태 전체 리셋 */
+    if (s_pressed && (xTaskGetTickCount() - s_last_evt) > pdMS_TO_TICKS(200)) {
+        s_pressed         = false;
+        s_release_pending = false;
+        s_press_pending   = false;
+		
+		printf("[INFO] Jiral!\r\n");
+    }
+
+    *x = s_x;  *y = s_y;  *pressed = s_pressed;
 }
