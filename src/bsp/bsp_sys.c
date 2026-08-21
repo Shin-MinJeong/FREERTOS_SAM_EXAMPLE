@@ -32,7 +32,8 @@ extern void vApplicationIdleHook(void)
  */
 extern void vApplicationTickHook(void)
 {
-	lv_tick_inc(1);
+	//lv_tick_inc(1);
+	lv_tick_inc(1000 / configTICK_RATE_HZ);
 }
 
 extern void vApplicationMallocFailedHook(void)

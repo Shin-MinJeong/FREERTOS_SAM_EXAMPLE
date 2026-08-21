@@ -7,6 +7,10 @@
 
 #include "main.h"
 
+#define TOUCH_SWAP_XY   1
+#define TOUCH_INV_X     0
+#define TOUCH_INV_Y     0
+
 static lv_disp_draw_buf_t draw_buf;
 static lv_color_t buf1[LCD_BUF_SIZE];
 
@@ -27,28 +31,35 @@ static void my_lcd_flush_cb(lv_disp_drv_t * disp_drv, const lv_area_t * area, lv
 
 static void my_touch_read_cb(lv_indev_drv_t * indev_drv, lv_indev_data_t * data)
 {
-	static int16_t last_x = 0;
-	static int16_t last_y = 0;
-	
-	bool is_pressed = false;
-	uint16_t current_x = 0;
-	uint16_t current_y = 0;
+    static int16_t last_x = 0, last_y = 0;
+    bool     is_pressed = false;
+    uint16_t rx = 0, ry = 0;
 
-	bsp_touch_get_xy(&current_x, &current_y, &is_pressed);
+    bsp_touch_get_xy(&rx, &ry, &is_pressed);
 
-	if(is_pressed) {
-		last_x = (current_x * ILI9488_LCD_WIDTH) / TOUCH_MAX_X;
-        last_y = (current_y * ILI9488_LCD_HEIGHT) / TOUCH_MAX_Y;
-		
-		data->point.x = last_x;
-		data->point.y = last_y;
-		data->state = LV_INDEV_STATE_PR;
-		printf("[LVGL] X: %d, Y: %d\r\n", last_x, last_y);
-	} else {
-		data->point.x = last_x;
-		data->point.y = last_y;
-		data->state = LV_INDEV_STATE_REL;
-	}
+    if (is_pressed) {
+        uint16_t tx = rx, ty = ry;
+
+#if TOUCH_SWAP_XY
+        uint16_t tmp = tx; tx = ty; ty = tmp;
+#endif
+#if TOUCH_INV_X
+        tx = TOUCH_MAX_X - 1 - tx;
+#endif
+#if TOUCH_INV_Y
+        ty = TOUCH_MAX_Y - 1 - ty;
+#endif
+
+        last_x = (int16_t)(((uint32_t)tx * ILI9488_LCD_WIDTH)  / TOUCH_MAX_X);
+        last_y = (int16_t)(((uint32_t)ty * ILI9488_LCD_HEIGHT) / TOUCH_MAX_Y);
+
+        if (last_x >= ILI9488_LCD_WIDTH)  last_x = ILI9488_LCD_WIDTH  - 1;
+        if (last_y >= ILI9488_LCD_HEIGHT) last_y = ILI9488_LCD_HEIGHT - 1;
+    }
+
+    data->point.x = last_x;
+    data->point.y = last_y;
+    data->state   = is_pressed ? LV_INDEV_STATE_PR : LV_INDEV_STATE_REL;
 }
 
 /* LCD test (ili9488) */
@@ -76,8 +87,6 @@ static void task_lcd(void *pvParameters)
     gui_app_create_ui();
 	
     for (;;) {
-		lv_tick_inc(5);
-		
         lv_timer_handler();
         vTaskDelay(pdMS_TO_TICKS(5));
     }
