@@ -193,7 +193,7 @@ void bsp_touch_get_xy(uint16_t *x, uint16_t *y, bool *pressed)
     }
 
     /* 와치독: 200ms간 T9 이벤트 없으면 강제 릴리스 + 상태 전체 리셋 */
-    if (s_pressed && (xTaskGetTickCount() - s_last_evt) > pdMS_TO_TICKS(200)) {
+    if (s_pressed && (xTaskGetTickCount() - s_last_evt) > pdMS_TO_TICKS(80)) {
         s_pressed         = false;
         s_release_pending = false;
         s_press_pending   = false;

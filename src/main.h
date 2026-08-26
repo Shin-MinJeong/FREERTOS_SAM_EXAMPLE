@@ -35,6 +35,6 @@
 #define TASK_LCD_STACK_SIZE				   (8192/sizeof(portSTACK_TYPE))
 #define TASK_LCD_STACK_PRIORITY			   (tskIDLE_PRIORITY + 1)
 
-#define LCD_BUF_SIZE (ILI9488_LCD_WIDTH * 40)
+#define LCD_BUF_SIZE (ILI9488_LCD_WIDTH * 120)
 
 #endif /* MAIN_H_ */
