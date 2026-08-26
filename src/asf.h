@@ -62,6 +62,12 @@
 // From module: Display - ILI9488 LCD Controller (EBI)
 #include <ili9488.h>
 
+// From module: FatFS file system
+#include <diskio.h>
+#include <ff.h>
+#include <ffconf.h>
+#include <integer.h>
+
 // From module: FreeRTOS - kernel 10.0.0
 #include <FreeRTOS.h>
 #include <StackMacros.h>
@@ -86,6 +92,9 @@
 // From module: Generic board support
 #include <board.h>
 
+// From module: High Speed Multimedia Card Interface
+#include <hsmci.h>
+
 // From module: IOPORT - General purpose I/O service
 #include <ioport.h>
 
@@ -94,6 +103,9 @@
 
 // From module: MPU - Memory Protect Unit
 #include <mpu.h>
+
+// From module: Memory Control Access Interface
+#include <ctrl_access.h>
 
 // From module: PIO - Parallel Input/Output Controller
 #include <pio.h>
@@ -105,17 +117,33 @@
 // From module: Part identification macros
 #include <parts.h>
 
+// From module: RTC - Real Time Clock
+#include <rtc.h>
+
 // From module: SAM FPU driver
 #include <fpu.h>
 
 // From module: SAMV71 XULTRA LED support enabled
 #include <led.h>
 
+// From module: SD/MMC stack on SPI interface
+#include <sd_mmc.h>
+
 // From module: SMC - Static Memory Controller
 #include <smc.h>
 
+// From module: SPI - SAM Implementation
+#include <spi_master.h>
+#include <spi_master.h>
+
+// From module: SPI - Serial Peripheral Interface
+#include <spi.h>
+
 // From module: Standard serial I/O (stdio) - SAM implementation
 #include <stdio_serial.h>
+
+// From module: Supported ports of FatFS
+#include <diskio.h>
 
 // From module: System Clock Control - SAMV71 implementation
 #include <sysclk.h>
@@ -137,6 +165,9 @@
 
 // From module: USART - Univ. Syn Async Rec/Trans
 #include <usart.h>
+
+// From module: XDMAC - XDMA Controller
+#include <xdmac.h>
 
 // From module: maXTouch - ATMXT122S Controller
 #include <mxt_device_1.h>
