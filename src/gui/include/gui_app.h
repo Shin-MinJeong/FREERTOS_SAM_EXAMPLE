@@ -13,5 +13,6 @@
 
 void draw_dot_cat(uint32_t start_x, uint32_t start_y, uint32_t pixel_size);
 void gui_app_create_ui(void);
+void dump_images_to_sd(void);
 
 #endif /* GUI_APP_H_ */

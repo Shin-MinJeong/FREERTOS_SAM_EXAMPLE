@@ -10,6 +10,11 @@
 
 #if LV_USE_FS_FATFS
 #include "ff.h"
+#include "main.h"
+
+#ifndef f_closedir
+#define f_closedir(dir) (FR_OK)
+#endif
 
 /*********************
  *      DEFINES
@@ -114,7 +119,32 @@ static void * fs_open(lv_fs_drv_t * drv, const char * path, lv_fs_mode_t mode)
     if(f == NULL) return NULL;
 
     FRESULT res = f_open(f, path, flags);
+	printf("[LVFS] open('%s') res=%d\r\n", path, res);
+	
     if(res == FR_OK) {
+		
+		uint8_t buf1[16], buf2[16];
+    UINT br;
+
+    f_lseek(f, 4);              // 헤더 4바이트 다음 = row 0 시작
+    f_read(f, buf1, 16, &br);
+
+    f_lseek(f, 4 + 200*2);      // row 1 (두번째 줄) 시작 (200px * 2byte)
+    f_read(f, buf2, 16, &br);
+
+    f_lseek(f, 4 + 200*2*100);  // row 100 (중간쯤) 시작
+    uint8_t buf3[16];
+    f_read(f, buf3, 16, &br);
+
+    f_lseek(f, 0);  // 되돌리기
+
+    printf("[LVFS] row0 : %02X %02X %02X %02X %02X %02X %02X %02X\r\n",
+           buf1[0],buf1[1],buf1[2],buf1[3],buf1[4],buf1[5],buf1[6],buf1[7]);
+    printf("[LVFS] row1 : %02X %02X %02X %02X %02X %02X %02X %02X\r\n",
+           buf2[0],buf2[1],buf2[2],buf2[3],buf2[4],buf2[5],buf2[6],buf2[7]);
+    printf("[LVFS] row100: %02X %02X %02X %02X %02X %02X %02X %02X\r\n",
+           buf3[0],buf3[1],buf3[2],buf3[3],buf3[4],buf3[5],buf3[6],buf3[7]);
+
         return f;
     }
     else {
@@ -152,6 +182,7 @@ static lv_fs_res_t fs_read(lv_fs_drv_t * drv, void * file_p, void * buf, uint32_
 {
     LV_UNUSED(drv);
     FRESULT res = f_read(file_p, buf, btr, (UINT *)br);
+	printf("[LVFS] read res=%d, btr=%lu, br=%lu\r\n", res, (unsigned long)btr, (unsigned long)*br);
     if(res == FR_OK) return LV_FS_RES_OK;
     else return LV_FS_RES_UNKNOWN;
 }

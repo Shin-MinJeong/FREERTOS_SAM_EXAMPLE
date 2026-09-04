@@ -84,6 +84,7 @@ static void my_touch_read_cb(lv_indev_drv_t * indev_drv, lv_indev_data_t * data)
 static void task_lcd(void *pvParameters)
 {
 	lv_init();
+
     lv_disp_draw_buf_init(&draw_buf, buf1, NULL, LCD_BUF_SIZE);
 
 	/* display driver */

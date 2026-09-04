@@ -1,9 +1,11 @@
 /**
  * \file
  *
- * \brief SAMV71-XPLAINED-ULTRA board configuration.
+ * \brief Management of the virtual memory.
  *
- * Copyright (c) 2015-2018 Microchip Technology Inc. and its subsidiaries.
+ * This file manages the virtual memory.
+ *
+ * Copyright (c) 2009-2018 Microchip Technology Inc. and its subsidiaries.
  *
  * \asf_license_start
  *
@@ -34,24 +36,52 @@
  * Support and FAQ: visit <a href="https://www.microchip.com/support/">Microchip Support</a>
  */
 
-#ifndef CONF_BOARD_H_INCLUDED
-#define CONF_BOARD_H_INCLUDED
+#ifndef _VIRTUAL_MEM_H_
+#define _VIRTUAL_MEM_H_
 
-/* Enable ICache and DCache */
-//#define CONF_BOARD_ENABLE_CACHE_AT_INIT
 
-#define CONF_BOARD_CONFIG_MPU_AT_INIT
+#include "conf_access.h"
 
-/* Configure UART pins */
-#define CONF_BOARD_UART_CONSOLE
+#if VIRTUAL_MEM == ENABLE
 
-#define CONF_BOARD_TWIHS0
+#include "ctrl_access.h"
 
-/* Indicates board has an ILI9488 external component to control LCD */
-#define CONF_BOARD_ILI9488
-#define ILI9488_EBIMODE
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-/* sdcard */
-#define CONF_BOARD_SD_MMC_HSMCI
+//_____ D E F I N I T I O N S ______________________________________________
 
-#endif /* CONF_BOARD_H_INCLUDED */
+#define VMEM_SECTOR_SIZE   512
+
+
+//---- CONTROL FUNCTIONS ----
+
+extern Ctrl_status  virtual_test_unit_ready(void);
+extern Ctrl_status  virtual_read_capacity(uint32_t *u32_nb_sector);
+extern bool         virtual_wr_protect(void);
+extern bool         virtual_removal(void);
+extern bool         virtual_unload(bool unload);
+
+
+//---- ACCESS DATA FUNCTIONS ----
+
+// USB interface
+#if ACCESS_USB == true
+extern Ctrl_status  virtual_usb_read_10 (uint32_t addr, uint16_t nb_sector);
+extern Ctrl_status  virtual_usb_write_10(uint32_t addr, uint16_t nb_sector);
+#endif
+
+// RAM interface
+#if ACCESS_MEM_TO_RAM == true
+extern Ctrl_status  virtual_mem_2_ram(uint32_t addr,       void *ram);
+extern Ctrl_status  virtual_ram_2_mem(uint32_t addr, const void *ram);
+#endif
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
+
+#endif  // _VIRTUAL_MEM_H_

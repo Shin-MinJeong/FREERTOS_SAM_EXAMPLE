@@ -115,6 +115,8 @@ void bsp_sys_init(void)
 	sysclk_init();
 	board_init();
 	configure_console();
+	
+	sdMountedSem = xSemaphoreCreateBinary();
 }
 
 void bsp_sys_tasks_create(void)

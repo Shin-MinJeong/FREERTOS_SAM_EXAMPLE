@@ -83,7 +83,7 @@
  */
 
 #include "main.h"
-
+	
 struct mxt_device device; /* Device data container */
 
 int main(void)
@@ -99,6 +99,9 @@ int main(void)
 	
 	bsp_sys_tasks_create();
 	gui_engine_task_create();
+
+	sdcard_task_create();
+
 	vTaskStartScheduler();
 
 	return 0;

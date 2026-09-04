@@ -47,6 +47,8 @@
 #include "compiler.h"
 #include "board.h"
 
+#define  VIRTUAL_MEMORY_ENABLE
+#define  ACCESS_MEM_TO_RAM    1
 
 /*! \name Activation of Logical Unit Numbers
  */
@@ -100,19 +102,19 @@
 /*! \name LUN 0 Definitions
  */
 //! @{
-#define VIRTUAL_MEM                             LUN_0
-#define LUN_ID_VIRTUAL_MEM                      LUN_ID_0
-#define LUN_0_INCLUDE                           "virtual_mem.h"
-#define Lun_0_test_unit_ready                   virtual_test_unit_ready
-#define Lun_0_read_capacity                     virtual_read_capacity
-#define Lun_0_unload                            NULL /* Can not be unloaded */
-#define Lun_0_wr_protect                        virtual_wr_protect
-#define Lun_0_removal                           virtual_removal
-#define Lun_0_usb_read_10                       virtual_usb_read_10
-#define Lun_0_usb_write_10                      virtual_usb_write_10
-#define Lun_0_mem_2_ram                         virtual_mem_2_ram
-#define Lun_0_ram_2_mem                         virtual_ram_2_mem
-#define LUN_0_NAME                              "\"On-Chip Virtual Memory\""
+#define SD_MMC_0_MEM                            LUN_0
+#define LUN_ID_SD_MMC_0_MEM                     LUN_ID_0
+#define LUN_0_INCLUDE                           "sd_mmc_mem.h"
+#define Lun_0_test_unit_ready                   sd_mmc_test_unit_ready_0
+#define Lun_0_read_capacity                     sd_mmc_read_capacity_0
+#define Lun_0_unload                            sd_mmc_unload_0
+#define Lun_0_wr_protect                        sd_mmc_wr_protect_0
+#define Lun_0_removal                           sd_mmc_removal_0
+#define Lun_0_usb_read_10                       sd_mmc_usb_read_10_0
+#define Lun_0_usb_write_10                      sd_mmc_usb_write_10_0
+#define Lun_0_mem_2_ram                         sd_mmc_mem_2_ram_0
+#define Lun_0_ram_2_mem                         sd_mmc_ram_2_mem_0
+#define LUN_0_NAME                              "\"SD/MMC Card Slot 0\""
 //! @}
 
 /*! \name LUN 1 Definitions
@@ -136,19 +138,19 @@
 /*! \name LUN 2 Definitions
  */
 //! @{
-#define SD_MMC_0_MEM                            LUN_2
-#define LUN_ID_SD_MMC_0_MEM                     LUN_ID_2
-#define LUN_2_INCLUDE                           "sd_mmc_mem.h"
-#define Lun_2_test_unit_ready                   sd_mmc_test_unit_ready_0
-#define Lun_2_read_capacity                     sd_mmc_read_capacity_0
-#define Lun_2_unload                            sd_mmc_unload_0
-#define Lun_2_wr_protect                        sd_mmc_wr_protect_0
-#define Lun_2_removal                           sd_mmc_removal_0
-#define Lun_2_usb_read_10                       sd_mmc_usb_read_10_0
-#define Lun_2_usb_write_10                      sd_mmc_usb_write_10_0
-#define Lun_2_mem_2_ram                         sd_mmc_mem_2_ram_0
-#define Lun_2_ram_2_mem                         sd_mmc_ram_2_mem_0
-#define LUN_2_NAME                              "\"SD/MMC Card Slot 0\""
+//#define SD_MMC_0_MEM                            LUN_2
+//#define LUN_ID_SD_MMC_0_MEM                     LUN_ID_2
+//#define LUN_2_INCLUDE                           "sd_mmc_mem.h"
+//#define Lun_2_test_unit_ready                   sd_mmc_test_unit_ready_0
+//#define Lun_2_read_capacity                     sd_mmc_read_capacity_0
+//#define Lun_2_unload                            sd_mmc_unload_0
+//#define Lun_2_wr_protect                        sd_mmc_wr_protect_0
+//#define Lun_2_removal                           sd_mmc_removal_0
+//#define Lun_2_usb_read_10                       sd_mmc_usb_read_10_0
+//#define Lun_2_usb_write_10                      sd_mmc_usb_write_10_0
+//#define Lun_2_mem_2_ram                         sd_mmc_mem_2_ram_0
+//#define Lun_2_ram_2_mem                         sd_mmc_ram_2_mem_0
+//#define LUN_2_NAME                              "\"SD/MMC Card Slot 0\""
 //! @}
 
 /*! \name LUN 3 Definitions
@@ -248,7 +250,7 @@
 #ifdef ACCESS_MEM_TO_RAM_ENABLED
 #define ACCESS_MEM_TO_RAM    true  //!< MEM <-> RAM interface.
 #else
-#define ACCESS_MEM_TO_RAM    false //!< MEM <-> RAM interface.
+#define ACCESS_MEM_TO_RAM    true //false //!< MEM <-> RAM interface.
 #endif
 
 #define ACCESS_STREAM        false //!< Streaming MEM <-> MEM interface.

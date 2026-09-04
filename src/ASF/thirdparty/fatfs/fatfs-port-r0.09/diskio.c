@@ -38,13 +38,7 @@ extern "C" {
 /**INDENT-ON**/
 /// @endcond
 
-#include "compiler.h"
-#include "diskio.h"
-#include "ctrl_access.h"
-
-#include <string.h>
-#include <stdio.h>
-#include <assert.h>
+#include "main.h"
 
 #if (SAM3S || SAM3U || SAM3N || SAM3XA || SAM4S || SAM4N)
 # include <rtc.h>
@@ -182,40 +176,58 @@ DSTATUS disk_status(BYTE drv)
  *
  * \return RES_OK for success, otherwise DRESULT error code.
  */
+COMPILER_ALIGNED(512) static uint8_t bounce_buf[512];
+static uint8_t mpu_configured = 0; // 초기화 플래그
+
 DRESULT disk_read(BYTE drv, BYTE *buff, DWORD sector, BYTE count)
 {
 #if ACCESS_MEM_TO_RAM
-	uint8_t uc_sector_size = mem_sector_size(drv);
-	uint32_t i;
-	uint32_t ul_last_sector_num;
+    uint8_t uc_sector_size = mem_sector_size(drv);
+    uint32_t i;
+    uint32_t ul_last_sector_num;
 
-	if (uc_sector_size == 0) {
-		return RES_ERROR;
-	}
+    if (uc_sector_size == 0) return RES_ERROR;
 
-	/* Check valid address */
-	mem_read_capacity(drv, &ul_last_sector_num);
-	if ((sector + count * uc_sector_size) >
-			(ul_last_sector_num + 1) * uc_sector_size) {
-		return RES_PARERR;
-	}
+    mem_read_capacity(drv, &ul_last_sector_num);
+    if ((sector + count * uc_sector_size) > (ul_last_sector_num + 1) * uc_sector_size) {
+        return RES_PARERR;
+    }
 
-	/* Read the data */
-	for (i = 0; i < count; i++) {
-		if (memory_2_ram(drv, sector + uc_sector_size * i,
-				buff + uc_sector_size * SECTOR_SIZE_DEFAULT * i) !=
-				CTRL_GOOD) {
-			return RES_ERROR;
-		}
-	}
+    if (mpu_configured == 0) {
+        MPU->CTRL = 0;
+        MPU->RNR = 14; 
+        MPU->RBAR = (uint32_t)bounce_buf;
+        // Normal Memory, Non-Cacheable, Size = 512 Bytes (8 << MPU_RASR_SIZE_Pos)
+        MPU->RASR = (1 << MPU_RASR_TEX_Pos)  |
+                    (0 << MPU_RASR_C_Pos)    |
+                    (0 << MPU_RASR_B_Pos)    |
+                    (1 << MPU_RASR_S_Pos)    |
+                    (3 << MPU_RASR_AP_Pos)   |
+                    (8 << MPU_RASR_SIZE_Pos) | 
+                    (1 << MPU_RASR_ENABLE_Pos);
+        MPU->CTRL = MPU_CTRL_ENABLE_Msk | MPU_CTRL_PRIVDEFENA_Msk;
+        __DSB();
+        __ISB();
+        mpu_configured = 1;
+    }
 
-	return RES_OK;
+    /* Data Read Loop */
+    for (i = 0; i < count; i++) {
+        Ctrl_status read_res = memory_2_ram(drv, sector + uc_sector_size * i, bounce_buf);
+
+        if (read_res != CTRL_GOOD) {
+            return RES_ERROR;
+        }
+
+        memcpy(buff + uc_sector_size * 512 * i, bounce_buf, 512);
+    }
+    
+    return RES_OK;
 
 #else
-	return RES_ERROR;
+    return RES_ERROR;
 #endif
 }
-
 /**
  * \brief  Write sector(s).
  *

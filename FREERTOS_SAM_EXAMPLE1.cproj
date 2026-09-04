@@ -32,17 +32,20 @@
       <framework-data>
         <options>
           <option id="common.boards" value="Add" config="" content-id="Atmel.ASF" />
+          <option id="common.components.memory.sd_mmc" value="Add" config="spi" content-id="Atmel.ASF" />
           <option id="common.components.touch.mxt" value="Add" config="" content-id="Atmel.ASF" />
           <option id="common.services.basic.clock" value="Add" config="" content-id="Atmel.ASF" />
+          <option id="common.services.delay" value="Add" config="" content-id="Atmel.ASF" />
           <option id="common.services.basic.gpio" value="Add" config="" content-id="Atmel.ASF" />
           <option id="common.services.ioport" value="Add" config="" content-id="Atmel.ASF" />
           <option id="common.utils.stdio.stdio_serial" value="Add" config="" content-id="Atmel.ASF" />
           <option id="sam.components.display.ili9488" value="Add" config="ebi" content-id="Atmel.ASF" />
+          <option id="sam.drivers.hsmci" value="Add" config="" content-id="Atmel.ASF" />
           <option id="sam.drivers.mpu" value="Add" config="" content-id="Atmel.ASF" />
           <option id="sam.drivers.pio" value="Add" config="" content-id="Atmel.ASF" />
           <option id="sam.drivers.pmc" value="Add" config="" content-id="Atmel.ASF" />
+          <option id="common.services.fs.fatfs" value="Add" config="" content-id="Atmel.ASF" />
           <option id="thirdparty.os.freertos.version" value="Add" config="10.0.0" content-id="Atmel.ASF" />
-          <option id="common.services.delay" value="Add" config="" content-id="Atmel.ASF" />
           <option id="common.services.freertos.sam_example" value="Add" config="" content-id="Atmel.ASF" />
           <option id="sam.utils.cmsis.samv71.source.template" value="Add" config="" content-id="Atmel.ASF" />
         </options>
@@ -58,6 +61,9 @@
           <configuration key="config.compiler.armgcc.printf" value="iprintf" default="iprintf" content-id="Atmel.ASF" />
           <configuration key="config.compiler.armgcc.scanf" value="iscanf" default="iscanf" content-id="Atmel.ASF" />
           <configuration key="config.sam.pio.pio_handler" value="yes" default="yes" content-id="Atmel.ASF" />
+          <configuration key="config.common.components.memory.sd_mmc.ctrl_access" value="disable" default="disable" content-id="Atmel.ASF" />
+          <configuration key="config.spi_master_type" value="standard_spi" default="standard_spi" content-id="Atmel.ASF" />
+          <configuration key="config.common.services.fs.fatfs.codepage" value="sbcs" default="sbcs" content-id="Atmel.ASF" />
         </configurations>
         <files>
           <file path="src/ASF/common/boards/board.h" framework="" version="" source="common/boards/board.h" changed="False" content-id="Atmel.ASF" />
@@ -313,6 +319,101 @@
           <file path="src/ASF/common/services/delay/sam/cycle_counter.c" framework="" version="3.52.0" source="common\services\delay\sam\cycle_counter.c" changed="False" content-id="Atmel.ASF" />
           <file path="src/ASF/common/services/delay/sam/cycle_counter.h" framework="" version="3.52.0" source="common\services\delay\sam\cycle_counter.h" changed="False" content-id="Atmel.ASF" />
           <file path="src/ASF/common/services/delay/delay.h" framework="" version="3.52.0" source="common\services\delay\delay.h" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/common/services/storage/ctrl_access/ctrl_access.c" framework="" version="3.52.0" source="common\services\storage\ctrl_access\ctrl_access.c" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/common/services/storage/ctrl_access/ctrl_access.h" framework="" version="3.52.0" source="common\services\storage\ctrl_access\ctrl_access.h" changed="False" content-id="Atmel.ASF" />
+          <file path="src/Config/conf_access.h" framework="" version="3.52.0" source="common\services\storage\ctrl_access\module_config\conf_access.h" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/sam/drivers/rtc/rtc.c" framework="" version="3.52.0" source="sam\drivers\rtc\rtc.c" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/sam/drivers/rtc/rtc.h" framework="" version="3.52.0" source="sam\drivers\rtc\rtc.h" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/sam/drivers/xdmac/xdmac.c" framework="" version="3.52.0" source="sam\drivers\xdmac\xdmac.c" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/sam/drivers/xdmac/xdmac.h" framework="" version="3.52.0" source="sam\drivers\xdmac\xdmac.h" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/src/ff.c" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\src\ff.c" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/00index_e.html" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\00index_e.html" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/00index_j.html" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\00index_j.html" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/en/dwrite.html" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\en\dwrite.html" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/en/close.html" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\en\close.html" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/en/unlink.html" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\en\unlink.html" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/img/f3.png" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\img\f3.png" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/img/f2.png" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\img\f2.png" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/img/f1.png" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\img\f1.png" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/en/mount.html" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\en\mount.html" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/en/appnote.html" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\en\appnote.html" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/ATMEL-disclaimer.txt" framework="" version="3.52.0" source="thirdparty\fatfs\ATMEL-disclaimer.txt" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/en/chdrive.html" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\en\chdrive.html" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/en/error.html" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\en\error.html" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/en/getcwd.html" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\en\getcwd.html" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/en/open.html" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\en\open.html" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/en/dstat.html" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\en\dstat.html" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/en/rename.html" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\en\rename.html" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/img/rwtest2.png" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\img\rwtest2.png" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/img/rwtest3.png" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\img\rwtest3.png" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/src/00readme.txt" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\src\00readme.txt" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/en/dioctl.html" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\en\dioctl.html" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/en/eof.html" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\en\eof.html" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/en/read.html" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\en\read.html" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/en/chdir.html" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\en\chdir.html" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/en/fattime.html" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\en\fattime.html" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/en/utime.html" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\en\utime.html" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/en/write.html" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\en\write.html" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/en/sfile.html" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\en\sfile.html" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/en/sdir.html" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\en\sdir.html" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/en/putc.html" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\en\putc.html" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/en/forward.html" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\en\forward.html" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/en/puts.html" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\en\puts.html" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/en/readdir.html" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\en\readdir.html" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/en/size.html" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\en\size.html" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/img/f6.png" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\img\f6.png" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/en/filename.html" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\en\filename.html" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/updates.txt" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\updates.txt" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/img/f5.png" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\img\f5.png" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/en/lseek.html" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\en\lseek.html" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/img/rwtest.png" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\img\rwtest.png" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/en/sfileinfo.html" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\en\sfileinfo.html" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/img/f4.png" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\img\f4.png" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/en/getfree.html" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\en\getfree.html" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/en/opendir.html" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\en\opendir.html" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/img/layers3.png" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\img\layers3.png" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/en/dread.html" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\en\dread.html" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/en/mkfs.html" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\en\mkfs.html" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/en/sync.html" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\en\sync.html" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/css_j.css" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\css_j.css" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/css_e.css" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\css_e.css" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/en/sfatfs.html" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\en\sfatfs.html" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/en/tell.html" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\en\tell.html" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/en/chmod.html" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\en\chmod.html" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/en/stat.html" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\en\stat.html" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/en/truncate.html" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\en\truncate.html" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/en/printf.html" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\en\printf.html" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/en/gets.html" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\en\gets.html" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/en/mkdir.html" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\en\mkdir.html" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/en/rc.html" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\en\rc.html" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/img/layers.png" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\img\layers.png" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/en/dinit.html" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\en\dinit.html" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/doc/en/fdisk.html" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\doc\en\fdisk.html" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/src/ffconf.h" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\src\ffconf.h" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/src/diskio.h" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\src\diskio.h" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/src/ff.h" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\src\ff.h" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/src/integer.h" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\src\integer.h" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/common/components/memory/sd_mmc/sd_mmc.c" framework="" version="3.52.0" source="common\components\memory\sd_mmc\sd_mmc.c" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/common/components/memory/sd_mmc/sd_mmc_spi.c" framework="" version="3.52.0" source="common\components\memory\sd_mmc\sd_mmc_spi.c" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/common/components/memory/sd_mmc/sd_mmc.h" framework="" version="3.52.0" source="common\components\memory\sd_mmc\sd_mmc.h" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/common/components/memory/sd_mmc/sd_mmc_spi.h" framework="" version="3.52.0" source="common\components\memory\sd_mmc\sd_mmc_spi.h" changed="False" content-id="Atmel.ASF" />
+          <file path="src/Config/conf_sd_mmc.h" framework="" version="3.52.0" source="common\components\memory\sd_mmc\module_config_spi\conf_sd_mmc.h" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/common/components/memory/sd_mmc/sd_mmc_protocol.h" framework="" version="3.52.0" source="common\components\memory\sd_mmc\sd_mmc_protocol.h" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/common/services/spi/sam_spi/spi_master.c" framework="" version="3.52.0" source="common\services\spi\sam_spi\spi_master.c" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/common/services/spi/sam_spi/spi_master.h" framework="" version="3.52.0" source="common\services\spi\sam_spi\spi_master.h" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/common/services/spi/spi_master.h" framework="" version="3.52.0" source="common\services\spi\spi_master.h" changed="False" content-id="Atmel.ASF" />
+          <file path="src/Config/conf_spi_master.h" framework="" version="3.52.0" source="common\services\spi\sam_spi\module_config\conf_spi_master.h" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/sam/drivers/hsmci/hsmci.c" framework="" version="3.52.0" source="sam\drivers\hsmci\hsmci.c" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/sam/drivers/hsmci/hsmci.h" framework="" version="3.52.0" source="sam\drivers\hsmci\hsmci.h" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/sam/drivers/spi/spi.c" framework="" version="3.52.0" source="sam\drivers\spi\spi.c" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/sam/drivers/spi/spi.h" framework="" version="3.52.0" source="sam\drivers\spi\spi.h" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-port-r0.09/diskio.c" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-port-r0.09\diskio.c" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-port-r0.09/sam/fattime_rtc.c" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-port-r0.09\sam\fattime_rtc.c" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/thirdparty/fatfs/fatfs-r0.09/src/option/ccsbcs.c" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\src\option\ccsbcs.c" changed="False" content-id="Atmel.ASF" />
+          <file path="src/Config/conf_fatfs.h" framework="" version="3.52.0" source="thirdparty\fatfs\fatfs-r0.09\src\module_config_sbcs\conf_fatfs.h" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/common/components/memory/virtual_mem/virtual_mem.c" framework="" version="3.52.0" source="common\components\memory\virtual_mem\virtual_mem.c" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/common/components/memory/virtual_mem/virtual_mem.h" framework="" version="3.52.0" source="common\components\memory\virtual_mem\virtual_mem.h" changed="False" content-id="Atmel.ASF" />
+          <file path="src/Config/conf_virtual_mem.h" framework="" version="3.52.0" source="common\components\memory\virtual_mem\module_config\conf_virtual_mem.h" changed="False" content-id="Atmel.ASF" />
         </files>
         <documentation help="https://asf.microchip.com/docs/3.52.0/common.services.freertos.sam_example.samv71_xplained_ultra/html/index.html" />
         <offline-documentation help="" />
@@ -419,6 +520,16 @@
       <Value>../src/ASF/common/components/touch/mxt</Value>
       <Value>../src/ASF/common/services/twi</Value>
       <Value>../src/ASF/common/services/delay</Value>
+      <Value>../src/ASF/common/services/storage/ctrl_access</Value>
+      <Value>../src/ASF/sam/drivers/rtc</Value>
+      <Value>../src/ASF/sam/drivers/xdmac</Value>
+      <Value>../src/ASF/thirdparty/fatfs/fatfs-r0.09/src</Value>
+      <Value>../src/ASF/common/components/memory/sd_mmc</Value>
+      <Value>../src/ASF/common/services/spi/sam_spi</Value>
+      <Value>../src/ASF/common/services/spi</Value>
+      <Value>../src/ASF/sam/drivers/hsmci</Value>
+      <Value>../src/ASF/sam/drivers/spi</Value>
+      <Value>../src/ASF/thirdparty/fatfs/fatfs-port-r0.09/sam</Value>
     </ListValues>
   </armgcc.compiler.directories.IncludePaths>
   <armgcc.compiler.optimization.level>Optimize most (-O3)</armgcc.compiler.optimization.level>
@@ -474,6 +585,16 @@
       <Value>../src/ASF/common/components/touch/mxt</Value>
       <Value>../src/ASF/common/services/twi</Value>
       <Value>../src/ASF/common/services/delay</Value>
+      <Value>../src/ASF/common/services/storage/ctrl_access</Value>
+      <Value>../src/ASF/sam/drivers/rtc</Value>
+      <Value>../src/ASF/sam/drivers/xdmac</Value>
+      <Value>../src/ASF/thirdparty/fatfs/fatfs-r0.09/src</Value>
+      <Value>../src/ASF/common/components/memory/sd_mmc</Value>
+      <Value>../src/ASF/common/services/spi/sam_spi</Value>
+      <Value>../src/ASF/common/services/spi</Value>
+      <Value>../src/ASF/sam/drivers/hsmci</Value>
+      <Value>../src/ASF/sam/drivers/spi</Value>
+      <Value>../src/ASF/thirdparty/fatfs/fatfs-port-r0.09/sam</Value>
     </ListValues>
   </armgcc.assembler.general.IncludePaths>
   <armgcc.preprocessingassembler.general.AssemblerFlags>-DARM_MATH_CM7=true -DBOARD=SAMV71_XPLAINED_ULTRA -D__FREERTOS__ -D__SAMV71Q21B__ -Dprintf=iprintf -Dscanf=iscanf -DILI9488_EBIMODE</armgcc.preprocessingassembler.general.AssemblerFlags>
@@ -512,6 +633,16 @@
       <Value>../src/ASF/common/components/touch/mxt</Value>
       <Value>../src/ASF/common/services/twi</Value>
       <Value>../src/ASF/common/services/delay</Value>
+      <Value>../src/ASF/common/services/storage/ctrl_access</Value>
+      <Value>../src/ASF/sam/drivers/rtc</Value>
+      <Value>../src/ASF/sam/drivers/xdmac</Value>
+      <Value>../src/ASF/thirdparty/fatfs/fatfs-r0.09/src</Value>
+      <Value>../src/ASF/common/components/memory/sd_mmc</Value>
+      <Value>../src/ASF/common/services/spi/sam_spi</Value>
+      <Value>../src/ASF/common/services/spi</Value>
+      <Value>../src/ASF/sam/drivers/hsmci</Value>
+      <Value>../src/ASF/sam/drivers/spi</Value>
+      <Value>../src/ASF/thirdparty/fatfs/fatfs-port-r0.09/sam</Value>
     </ListValues>
   </armgcc.preprocessingassembler.general.IncludePaths>
 </ArmGcc>
@@ -577,6 +708,16 @@
       <Value>../src/ASF/common/components/touch/mxt</Value>
       <Value>../src/ASF/common/services/twi</Value>
       <Value>../src/ASF/common/services/delay</Value>
+      <Value>../src/ASF/common/services/storage/ctrl_access</Value>
+      <Value>../src/ASF/sam/drivers/rtc</Value>
+      <Value>../src/ASF/sam/drivers/xdmac</Value>
+      <Value>../src/ASF/thirdparty/fatfs/fatfs-r0.09/src</Value>
+      <Value>../src/ASF/common/components/memory/sd_mmc</Value>
+      <Value>../src/ASF/common/services/spi/sam_spi</Value>
+      <Value>../src/ASF/common/services/spi</Value>
+      <Value>../src/ASF/sam/drivers/hsmci</Value>
+      <Value>../src/ASF/sam/drivers/spi</Value>
+      <Value>../src/ASF/thirdparty/fatfs/fatfs-port-r0.09/sam</Value>
     </ListValues>
   </armgcc.compiler.directories.IncludePaths>
   <armgcc.compiler.optimization.OtherFlags>-fdata-sections</armgcc.compiler.optimization.OtherFlags>
@@ -633,6 +774,16 @@
       <Value>../src/ASF/common/components/touch/mxt</Value>
       <Value>../src/ASF/common/services/twi</Value>
       <Value>../src/ASF/common/services/delay</Value>
+      <Value>../src/ASF/common/services/storage/ctrl_access</Value>
+      <Value>../src/ASF/sam/drivers/rtc</Value>
+      <Value>../src/ASF/sam/drivers/xdmac</Value>
+      <Value>../src/ASF/thirdparty/fatfs/fatfs-r0.09/src</Value>
+      <Value>../src/ASF/common/components/memory/sd_mmc</Value>
+      <Value>../src/ASF/common/services/spi/sam_spi</Value>
+      <Value>../src/ASF/common/services/spi</Value>
+      <Value>../src/ASF/sam/drivers/hsmci</Value>
+      <Value>../src/ASF/sam/drivers/spi</Value>
+      <Value>../src/ASF/thirdparty/fatfs/fatfs-port-r0.09/sam</Value>
     </ListValues>
   </armgcc.assembler.general.IncludePaths>
   <armgcc.assembler.debugging.DebugLevel>Default (-g)</armgcc.assembler.debugging.DebugLevel>
@@ -672,6 +823,16 @@
       <Value>../src/ASF/common/components/touch/mxt</Value>
       <Value>../src/ASF/common/services/twi</Value>
       <Value>../src/ASF/common/services/delay</Value>
+      <Value>../src/ASF/common/services/storage/ctrl_access</Value>
+      <Value>../src/ASF/sam/drivers/rtc</Value>
+      <Value>../src/ASF/sam/drivers/xdmac</Value>
+      <Value>../src/ASF/thirdparty/fatfs/fatfs-r0.09/src</Value>
+      <Value>../src/ASF/common/components/memory/sd_mmc</Value>
+      <Value>../src/ASF/common/services/spi/sam_spi</Value>
+      <Value>../src/ASF/common/services/spi</Value>
+      <Value>../src/ASF/sam/drivers/hsmci</Value>
+      <Value>../src/ASF/sam/drivers/spi</Value>
+      <Value>../src/ASF/thirdparty/fatfs/fatfs-port-r0.09/sam</Value>
     </ListValues>
   </armgcc.preprocessingassembler.general.IncludePaths>
   <armgcc.preprocessingassembler.debugging.DebugLevel>Default (-Wa,-g)</armgcc.preprocessingassembler.debugging.DebugLevel>
@@ -684,6 +845,9 @@
     <Folder Include="src\ASF\common\" />
     <Folder Include="src\ASF\common\boards\" />
     <Folder Include="src\ASF\common\components\" />
+    <Folder Include="src\ASF\common\components\memory\" />
+    <Folder Include="src\ASF\common\components\memory\sd_mmc\" />
+    <Folder Include="src\ASF\common\components\memory\virtual_mem\" />
     <Folder Include="src\ASF\common\components\touch\" />
     <Folder Include="src\ASF\common\components\touch\mxt\" />
     <Folder Include="src\ASF\common\services\" />
@@ -697,6 +861,10 @@
     <Folder Include="src\ASF\common\services\ioport\sam\" />
     <Folder Include="src\ASF\common\services\serial\" />
     <Folder Include="src\ASF\common\services\serial\sam_uart\" />
+    <Folder Include="src\ASF\common\services\spi\" />
+    <Folder Include="src\ASF\common\services\spi\sam_spi\" />
+    <Folder Include="src\ASF\common\services\storage\" />
+    <Folder Include="src\ASF\common\services\storage\ctrl_access\" />
     <Folder Include="src\ASF\common\services\twi\" />
     <Folder Include="src\ASF\common\services\twi\sam_twihs\" />
     <Folder Include="src\ASF\common\utils\" />
@@ -712,12 +880,16 @@
     <Folder Include="src\ASF\sam\drivers\" />
     <Folder Include="src\ASF\sam\drivers\ebi\" />
     <Folder Include="src\ASF\sam\drivers\ebi\smc\" />
+    <Folder Include="src\ASF\sam\drivers\hsmci\" />
     <Folder Include="src\ASF\sam\drivers\mpu\" />
     <Folder Include="src\ASF\sam\drivers\pio\" />
     <Folder Include="src\ASF\sam\drivers\pmc\" />
+    <Folder Include="src\ASF\sam\drivers\rtc\" />
+    <Folder Include="src\ASF\sam\drivers\spi\" />
     <Folder Include="src\ASF\sam\drivers\twihs\" />
     <Folder Include="src\ASF\sam\drivers\uart\" />
     <Folder Include="src\ASF\sam\drivers\usart\" />
+    <Folder Include="src\ASF\sam\drivers\xdmac\" />
     <Folder Include="src\ASF\sam\utils\" />
     <Folder Include="src\ASF\sam\utils\cmsis\" />
     <Folder Include="src\ASF\sam\utils\cmsis\samv71\" />
@@ -743,6 +915,15 @@
     <Folder Include="src\ASF\thirdparty\CMSIS\Include\" />
     <Folder Include="src\ASF\thirdparty\CMSIS\Lib\" />
     <Folder Include="src\ASF\thirdparty\CMSIS\Lib\GCC\" />
+    <Folder Include="src\ASF\thirdparty\fatfs\" />
+    <Folder Include="src\ASF\thirdparty\fatfs\fatfs-port-r0.09\" />
+    <Folder Include="src\ASF\thirdparty\fatfs\fatfs-port-r0.09\sam\" />
+    <Folder Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\" />
+    <Folder Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\" />
+    <Folder Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\en\" />
+    <Folder Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\img\" />
+    <Folder Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\src\" />
+    <Folder Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\src\option\" />
     <Folder Include="src\ASF\thirdparty\freertos\" />
     <Folder Include="src\ASF\thirdparty\freertos\freertos-10.0.0\" />
     <Folder Include="src\ASF\thirdparty\freertos\freertos-10.0.0\Source\" />
@@ -822,6 +1003,33 @@
     <Folder Include="src\image" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="src\ASF\common\components\memory\sd_mmc\sd_mmc.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <None Include="src\ASF\common\components\memory\sd_mmc\sd_mmc.h">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\common\components\memory\sd_mmc\sd_mmc_protocol.h">
+      <SubType>compile</SubType>
+    </None>
+    <Compile Include="src\ASF\common\components\memory\sd_mmc\sd_mmc_mem.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\ASF\common\components\memory\sd_mmc\sd_mmc_mem.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\ASF\common\components\memory\sd_mmc\sd_mmc_spi.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <None Include="src\ASF\common\components\memory\sd_mmc\sd_mmc_spi.h">
+      <SubType>compile</SubType>
+    </None>
+    <Compile Include="src\ASF\common\components\memory\virtual_mem\virtual_mem.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <None Include="src\ASF\common\components\memory\virtual_mem\virtual_mem.h">
+      <SubType>compile</SubType>
+    </None>
     <Compile Include="src\ASF\common\components\touch\mxt\mxt_device_1.c">
       <SubType>compile</SubType>
     </Compile>
@@ -849,16 +1057,82 @@
     <None Include="src\ASF\common\services\delay\sam\cycle_counter.h">
       <SubType>compile</SubType>
     </None>
+    <Compile Include="src\ASF\common\services\spi\sam_spi\spi_master.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <None Include="src\ASF\common\services\spi\sam_spi\spi_master.h">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\common\services\spi\spi_master.h">
+      <SubType>compile</SubType>
+    </None>
+    <Compile Include="src\ASF\common\services\storage\ctrl_access\ctrl_access.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <None Include="src\ASF\common\services\storage\ctrl_access\ctrl_access.h">
+      <SubType>compile</SubType>
+    </None>
     <Compile Include="src\ASF\sam\components\display\ili9488\ili9488.c">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="src\ASF\sam\drivers\hsmci\hsmci.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <None Include="src\ASF\sam\drivers\hsmci\hsmci.h">
+      <SubType>compile</SubType>
+    </None>
+    <Compile Include="src\ASF\sam\drivers\rtc\rtc.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <None Include="src\ASF\sam\drivers\rtc\rtc.h">
+      <SubType>compile</SubType>
+    </None>
+    <Compile Include="src\ASF\sam\drivers\spi\spi.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <None Include="src\ASF\sam\drivers\spi\spi.h">
+      <SubType>compile</SubType>
+    </None>
     <Compile Include="src\ASF\sam\drivers\twihs\twihs.c">
       <SubType>compile</SubType>
     </Compile>
     <None Include="src\ASF\sam\drivers\twihs\twihs.h">
       <SubType>compile</SubType>
     </None>
+    <Compile Include="src\ASF\sam\drivers\xdmac\xdmac.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <None Include="src\ASF\sam\drivers\xdmac\xdmac.h">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\src\diskio.h">
+      <SubType>compile</SubType>
+    </None>
+    <Compile Include="src\ASF\thirdparty\fatfs\fatfs-port-r0.09\diskio.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\ASF\thirdparty\fatfs\fatfs-port-r0.09\sam\fattime_rtc.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\src\ff.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\src\ffconf.h">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\src\ff.h">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\src\integer.h">
+      <SubType>compile</SubType>
+    </None>
+    <Compile Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\src\option\ccsbcs.c">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="src\bsp\bsp_lcd.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\bsp\bsp_sdcard.c">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\bsp\bsp_touch.c">
@@ -870,12 +1144,216 @@
     <Compile Include="src\bsp\include\bsp_sys.h">
       <SubType>compile</SubType>
     </Compile>
+    <None Include="src\ASF\thirdparty\fatfs\ATMEL-disclaimer.txt">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\00index_e.html">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\00index_j.html">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\css_e.css">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\css_j.css">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\en\appnote.html">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\en\chdir.html">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\en\chdrive.html">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\en\chmod.html">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\en\close.html">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\en\dinit.html">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\en\dioctl.html">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\en\dread.html">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\en\dstat.html">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\en\dwrite.html">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\en\eof.html">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\en\error.html">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\en\fattime.html">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\en\fdisk.html">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\en\filename.html">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\en\forward.html">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\en\getcwd.html">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\en\getfree.html">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\en\gets.html">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\en\lseek.html">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\en\mkdir.html">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\en\mkfs.html">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\en\mount.html">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\en\open.html">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\en\opendir.html">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\en\printf.html">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\en\putc.html">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\en\puts.html">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\en\rc.html">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\en\read.html">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\en\readdir.html">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\en\rename.html">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\en\sdir.html">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\en\sfatfs.html">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\en\sfile.html">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\en\sfileinfo.html">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\en\size.html">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\en\stat.html">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\en\sync.html">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\en\tell.html">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\en\truncate.html">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\en\unlink.html">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\en\utime.html">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\en\write.html">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\img\f1.png">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\img\f2.png">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\img\f3.png">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\img\f4.png">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\img\f5.png">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\img\f6.png">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\img\layers.png">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\img\layers3.png">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\img\rwtest.png">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\img\rwtest2.png">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\img\rwtest3.png">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\doc\updates.txt">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\src\00readme.txt">
+      <SubType>compile</SubType>
+    </None>
     <None Include="src\config\conf_mxt.h">
       <SubType>compile</SubType>
     </None>
     <Compile Include="src\bsp\include\bsp_touch.h">
       <SubType>compile</SubType>
     </Compile>
+    <None Include="src\config\conf_access.h">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\config\conf_sd_mmc.h">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\config\conf_spi_master.h">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\config\conf_fatfs.h">
+      <SubType>compile</SubType>
+    </None>
+    <Compile Include="src\bsp\include\bsp_sdcard.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <None Include="src\config\conf_virtual_mem.h">
+      <SubType>compile</SubType>
+    </None>
     <Compile Include="src\gui\gui_app.c">
       <SubType>compile</SubType>
     </Compile>

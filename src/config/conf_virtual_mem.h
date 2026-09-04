@@ -1,9 +1,12 @@
-/**
+/*****************************************************************************
+ *
  * \file
  *
- * \brief SAMV71-XPLAINED-ULTRA board configuration.
+ * \brief Virtual memory configuration file.
  *
- * Copyright (c) 2015-2018 Microchip Technology Inc. and its subsidiaries.
+ * This file contains the possible external configuration of the AT45DBX.
+ *
+ * Copyright (c) 2014-2018 Microchip Technology Inc. and its subsidiaries.
  *
  * \asf_license_start
  *
@@ -29,29 +32,23 @@
  *
  * \asf_license_stop
  *
- */
+ ******************************************************************************/
 /*
  * Support and FAQ: visit <a href="https://www.microchip.com/support/">Microchip Support</a>
  */
 
-#ifndef CONF_BOARD_H_INCLUDED
-#define CONF_BOARD_H_INCLUDED
 
-/* Enable ICache and DCache */
-//#define CONF_BOARD_ENABLE_CACHE_AT_INIT
+#ifndef _CONF_VIRTUAL_MEM_H_
+#define _CONF_VIRTUAL_MEM_H_
 
-#define CONF_BOARD_CONFIG_MPU_AT_INIT
+#ifndef VMEM_NB_SECTOR
+#warning Enter the size of Virtual Memory on internal RAM (unit 512B), using default value 4KB
+//! Size of Virtual Memory on internal RAM (unit 512B)
+#define VMEM_NB_SECTOR        8 //4KB
+#endif
 
-/* Configure UART pins */
-#define CONF_BOARD_UART_CONSOLE
+//! Choose which interface to set up, USB or RAM
+// #define ACCESS_USB         true
+// #define ACCESS_MEM_TO_RAM  true
 
-#define CONF_BOARD_TWIHS0
-
-/* Indicates board has an ILI9488 external component to control LCD */
-#define CONF_BOARD_ILI9488
-#define ILI9488_EBIMODE
-
-/* sdcard */
-#define CONF_BOARD_SD_MMC_HSMCI
-
-#endif /* CONF_BOARD_H_INCLUDED */
+#endif // _CONF_VIRTUAL_MEM_H_
