@@ -55,24 +55,18 @@ void scan_sd_card_for_images(void)
 
 	img_count = 0;
 	
-	// FatFs의 0번 드라이브(SD카드 루트) 열기
 	res = f_opendir(&dir, "0:");
 	if (res == FR_OK) {
 		while (1) {
-			// 파일 하나 읽기
 			res = f_readdir(&dir, &fno);
 			
-			// 더 이상 파일이 없거나 에러면 스캔 종료
 			if (res != FR_OK || fno.fname[0] == 0) break;
 			
-			// 디렉토리(폴더)면 건너뛰기
 			if (fno.fattrib & AM_DIR) continue;
 
-			// 파일명에 ".bin"이나 ".BIN"이 포함되어 있는지 확인
 			char *ext = strrchr(fno.fname, '.');
 			if (ext && (strcmp(ext, ".bin") == 0 || strcmp(ext, ".BIN") == 0)) {
 				if (img_count < MAX_IMAGES) {
-					// 1. LVGL이 읽을 전체 경로 만들기 ("S:파일명.bin")
 					sprintf(img_table[img_count].path, "S:%s", fno.fname);
 					
 					char *path_dot = strrchr(img_table[img_count].path, '.');
@@ -81,14 +75,9 @@ void scan_sd_card_for_images(void)
 							*p = tolower((unsigned char)*p);
 					}
 
-					//for (char *p = img_table[img_count].path; *p; p++) {
-						//*p = tolower((unsigned char)*p);
-					//}
-
-					// 2. UI에 표시할 이름 만들기 (확장자 .bin 떼어내기)
 					strncpy(img_table[img_count].name, fno.fname, 31);
 					char *dot = strrchr(img_table[img_count].name, '.');
-					if (dot) *dot = '\0'; // 온점(.) 위치에서 문자열 자르기
+					if (dot) *dot = '\0';
 					
 					printf("[SCAN] Found Image: %s -> %s\r\n", fno.fname, img_table[img_count].path);
 					img_count++;
@@ -101,6 +90,49 @@ void scan_sd_card_for_images(void)
 }
 
 
+static lv_img_dsc_t  g_ram_dsc;
+static uint8_t     * g_ram_buf = NULL;
+static COMPILER_ALIGNED(32) uint8_t s_bounce[512];
+
+/* path 예: "0:CAT5.bin"  (LVGL의 "S:" 가 아니라 FatFs 드라이브 번호) */
+static bool load_bin_to_ram(const char *path)
+{
+    FIL f;  UINT br;  lv_img_header_t hdr;
+
+    if (f_open(&f, path, FA_READ) != FR_OK) { printf("[RAM] open fail\r\n"); return false; }
+    if (f_read(&f, &hdr, sizeof(hdr), &br) != FR_OK || br != sizeof(hdr)) { f_close(&f); return false; }
+
+    uint32_t px   = lv_img_cf_get_px_size(hdr.cf) >> 3;      /* 바이트/픽셀 */
+    uint32_t size = (uint32_t)hdr.w * hdr.h * px;
+
+    /* 이전 이미지가 캐시에 남아있으면 무효화 후 해제 */
+    if (g_ram_buf) {
+        lv_img_cache_invalidate_src(&g_ram_dsc);
+        lv_mem_free(g_ram_buf);
+        g_ram_buf = NULL;
+    }
+
+    g_ram_buf = lv_mem_alloc(size);
+    if (!g_ram_buf) { printf("[RAM] alloc FAIL %lu\r\n", (unsigned long)size); f_close(&f); return false; }
+
+    uint32_t total = 0;
+    while (total < size) {
+        uint32_t chunk = (size - total > sizeof(s_bounce)) ? sizeof(s_bounce) : (size - total);
+        if (f_read(&f, s_bounce, chunk, &br) != FR_OK || br == 0) break;
+        memcpy(g_ram_buf + total, s_bounce, br);
+        total += br;
+    }
+    f_close(&f);
+	
+    if (total != size) return false;
+
+    g_ram_dsc.header    = hdr;
+    g_ram_dsc.data_size = size;
+    g_ram_dsc.data      = g_ram_buf;
+
+    return true;
+}
+
 /* 뒤로가기 */
 static void back_event_cb(lv_event_t * e)
 {
@@ -109,21 +141,39 @@ static void back_event_cb(lv_event_t * e)
 }
 
 /* 리스트 항목 클릭 */
+//static void list_btn_event_cb(lv_event_t * e)
+//{
+	//uint32_t idx = (uint32_t)(uintptr_t)lv_event_get_user_data(e);
+	//if (idx >= img_count) return;
+//
+	//printf("[LIST] Loading %s from %s ...\r\n", img_table[idx].name, img_table[idx].path);
+//
+	//lv_img_set_src(g_img, img_table[idx].path);
+	//lv_label_set_text(g_title, img_table[idx].name);
+	//lv_scr_load(g_scr_view);
+	//
+	//lv_mem_monitor_t mon;
+	//lv_mem_monitor(&mon);
+	//printf("[MEM] total=%u, free=%u, used_pct=%u%%, max_used=%u\r\n", (unsigned)mon.total_size, (unsigned)mon.free_size, mon.used_pct, (unsigned)mon.max_used);
+	   //
+//}
 static void list_btn_event_cb(lv_event_t * e)
 {
-	uint32_t idx = (uint32_t)(uintptr_t)lv_event_get_user_data(e);
-	if (idx >= img_count) return;
+    uint32_t idx = (uint32_t)(uintptr_t)lv_event_get_user_data(e);
+    if (idx >= img_count) return;
 
-	printf("[LIST] Loading %s from %s ...\r\n", img_table[idx].name, img_table[idx].path);
+    char fatfs_path[40];
+    snprintf(fatfs_path, sizeof(fatfs_path), "0:%s", img_table[idx].path + 2);
 
-	lv_img_set_src(g_img, img_table[idx].path);
-	lv_label_set_text(g_title, img_table[idx].name);
-	lv_scr_load(g_scr_view);
-	
-	lv_mem_monitor_t mon;
-	lv_mem_monitor(&mon);
-	printf("[MEM] total=%u, free=%u, used_pct=%u%%, max_used=%u\r\n", (unsigned)mon.total_size, (unsigned)mon.free_size, mon.used_pct, (unsigned)mon.max_used);
-	   
+    if (!load_bin_to_ram(fatfs_path)) {
+        printf("[LIST] load failed\r\n");
+        return;
+    }
+
+    lv_img_cache_invalidate_src(&g_ram_dsc);   /* 같은 포인터 재사용이므로 필수 */
+    lv_img_set_src(g_img, &g_ram_dsc);
+    lv_label_set_text(g_title, img_table[idx].name);
+    lv_scr_load(g_scr_view);
 }
 
 static void create_list_screen(void)
@@ -183,43 +233,58 @@ void gui_app_create_ui(void)
 }
 
 // 이미지 백업용 임시 함수 ...
+static COMPILER_ALIGNED(32) uint8_t s_wbuf[512];
+
 void dump_images_to_sd(void)
 {
-	FIL file;
-	UINT bw;
-	char filename[48];
+    FIL  f;
+    UINT bw;
+    char filename[48];
 
-	printf("--- Start Image Backup to SD Card ---\n");
+    printf("--- Start Image Backup to SD Card ---\n");
 
-	for (uint32_t i = 0; i < IMG_COUNT; i++) {
-		const flash_img_item_t *item = &flash_img_table[i];
+    for (uint32_t i = 0; i < IMG_COUNT; i++) {
+        const flash_img_item_t *item = &flash_img_table[i];
+        const uint8_t *src = (const uint8_t *)item->dsc->data;
+        uint32_t remain    = item->dsc->data_size;
+        uint32_t total     = 0;
+        bool     ok        = true;
 
-		printf("[DUMP] %s : w=%d h=%d data_size=%lu\n",
-		item->name,
-		item->dsc->header.w,
-		item->dsc->header.h,
-		(unsigned long)item->dsc->data_size);
+        snprintf(filename, sizeof(filename), "0:%s.bin", item->name);
 
-		sprintf(filename, "0:%s.bin", item->name);
+        if (f_open(&f, filename, FA_CREATE_ALWAYS | FA_WRITE) != FR_OK) {
+            printf("[DUMP] open fail: %s\n", filename);
+            continue;
+        }
 
-		if (f_open(&file, filename, FA_CREATE_ALWAYS | FA_WRITE) == FR_OK) {
+        memcpy(s_wbuf, &item->dsc->header, sizeof(lv_img_header_t));
+        if (f_write(&f, s_wbuf, sizeof(lv_img_header_t), &bw) != FR_OK
+            || bw != sizeof(lv_img_header_t)) {
+            printf("[DUMP] header write FAIL\n");
+            ok = false;
+        }
 
-			FRESULT wres1 = f_write(&file, &item->dsc->header, sizeof(lv_img_header_t), &bw);
-			printf("[DUMP] header write res=%d, bw=%u\n", wres1, bw);
+        while (ok && remain > 0) {
+            uint32_t chunk = (remain > sizeof(s_wbuf)) ? sizeof(s_wbuf) : remain;
 
-			FRESULT wres2 = f_write(&file, item->dsc->data, item->dsc->data_size, &bw);
-			printf("[DUMP] data write res=%d, requested=%lu, written=%u\n",
-			wres2, (unsigned long)item->dsc->data_size, bw);
+            memcpy(s_wbuf, src + total, chunk);     
 
-f_sync(&file);
+            if (f_write(&f, s_wbuf, chunk, &bw) != FR_OK || bw != chunk) {
+                printf("[DUMP] write FAIL at %lu (bw=%u)\n",
+                       (unsigned long)total, bw);
+                ok = false;
+                break;
+            }
+            total  += chunk;
+            remain -= chunk;
+        }
 
-			f_close(&file);
-			printf("Saved: %s (Size: %lu bytes)\n", filename,
-			(unsigned long)item->dsc->data_size + sizeof(lv_img_header_t));
-			} else {
-			printf("Failed to save: %s\n", filename);
-		}
-	}
+        f_sync(&f);
+        f_close(&f);
 
-	printf("--- Image Backup Finished! ---\n");
+        printf("[DUMP] %s : %s (%lu / %lu bytes)\n", item->name, ok ? "OK" : "FAILED", (unsigned long)total, (unsigned long)item->dsc->data_size);
+    }
+
+    printf("--- Image Backup Finished! ---\n");
 }
+

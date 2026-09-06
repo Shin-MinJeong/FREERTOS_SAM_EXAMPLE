@@ -106,51 +106,32 @@ static void fs_init(void)
  * @param mode read: FS_MODE_RD, write: FS_MODE_WR, both: FS_MODE_RD | FS_MODE_WR
  * @return pointer to FIL struct or NULL in case of fail
  */
+
+static COMPILER_ALIGNED(32) FIL g_file;
+static bool g_file_in_use = false;
+
 static void * fs_open(lv_fs_drv_t * drv, const char * path, lv_fs_mode_t mode)
 {
-    LV_UNUSED(drv);
-    uint8_t flags = 0;
+	LV_UNUSED(drv);
+	uint8_t flags = 0;
 
-    if(mode == LV_FS_MODE_WR) flags = FA_WRITE | FA_OPEN_ALWAYS;
-    else if(mode == LV_FS_MODE_RD) flags = FA_READ;
-    else if(mode == (LV_FS_MODE_WR | LV_FS_MODE_RD)) flags = FA_READ | FA_WRITE | FA_OPEN_ALWAYS;
+	if(mode == LV_FS_MODE_WR) flags = FA_WRITE | FA_OPEN_ALWAYS;
+	else if(mode == LV_FS_MODE_RD) flags = FA_READ;
+	else if(mode == (LV_FS_MODE_WR | LV_FS_MODE_RD)) flags = FA_READ | FA_WRITE | FA_OPEN_ALWAYS;
 
-    FIL * f = lv_mem_alloc(sizeof(FIL));
-    if(f == NULL) return NULL;
 
-    FRESULT res = f_open(f, path, flags);
-	printf("[LVFS] open('%s') res=%d\r\n", path, res);
-	
-    if(res == FR_OK) {
-		
-		uint8_t buf1[16], buf2[16];
-    UINT br;
-
-    f_lseek(f, 4);              // 헤더 4바이트 다음 = row 0 시작
-    f_read(f, buf1, 16, &br);
-
-    f_lseek(f, 4 + 200*2);      // row 1 (두번째 줄) 시작 (200px * 2byte)
-    f_read(f, buf2, 16, &br);
-
-    f_lseek(f, 4 + 200*2*100);  // row 100 (중간쯤) 시작
-    uint8_t buf3[16];
-    f_read(f, buf3, 16, &br);
-
-    f_lseek(f, 0);  // 되돌리기
-
-    printf("[LVFS] row0 : %02X %02X %02X %02X %02X %02X %02X %02X\r\n",
-           buf1[0],buf1[1],buf1[2],buf1[3],buf1[4],buf1[5],buf1[6],buf1[7]);
-    printf("[LVFS] row1 : %02X %02X %02X %02X %02X %02X %02X %02X\r\n",
-           buf2[0],buf2[1],buf2[2],buf2[3],buf2[4],buf2[5],buf2[6],buf2[7]);
-    printf("[LVFS] row100: %02X %02X %02X %02X %02X %02X %02X %02X\r\n",
-           buf3[0],buf3[1],buf3[2],buf3[3],buf3[4],buf3[5],buf3[6],buf3[7]);
-
-        return f;
-    }
-    else {
-        lv_mem_free(f);
+	if (g_file_in_use) {
         return NULL;
     }
+
+	FRESULT res = f_open(&g_file, path, flags);
+	if(res == FR_OK) {
+		g_file_in_use = true;
+		return &g_file; 
+	}
+	else {
+		return NULL;
+	}
 }
 
 /**
@@ -164,7 +145,7 @@ static lv_fs_res_t fs_close(lv_fs_drv_t * drv, void * file_p)
 {
     LV_UNUSED(drv);
     f_close(file_p);
-    lv_mem_free(file_p);
+    g_file_in_use = false; 
     return LV_FS_RES_OK;
 }
 
@@ -178,13 +159,37 @@ static lv_fs_res_t fs_close(lv_fs_drv_t * drv, void * file_p)
  * @return LV_FS_RES_OK: no error, the file is read
  *         any error from lv_fs_res_t enum
  */
+static COMPILER_ALIGNED(32) uint8_t bounce_buf[512];
+
 static lv_fs_res_t fs_read(lv_fs_drv_t * drv, void * file_p, void * buf, uint32_t btr, uint32_t * br)
 {
     LV_UNUSED(drv);
-    FRESULT res = f_read(file_p, buf, btr, (UINT *)br);
-	printf("[LVFS] read res=%d, btr=%lu, br=%lu\r\n", res, (unsigned long)btr, (unsigned long)*br);
-    if(res == FR_OK) return LV_FS_RES_OK;
-    else return LV_FS_RES_UNKNOWN;
+    FRESULT  res   = FR_OK;
+    uint32_t want  = btr;
+    uint32_t total = 0;
+    uint8_t *out   = (uint8_t *)buf;
+    UINT     rd;
+
+    while (btr > 0) {
+        uint32_t chunk = (btr > sizeof(bounce_buf)) ? sizeof(bounce_buf) : btr;
+
+        res = f_read(file_p, bounce_buf, chunk, &rd);
+        if (res != FR_OK) break;
+        if (rd == 0)      break;          /* EOF */
+
+        memcpy(out + total, bounce_buf, rd);
+        total += rd;
+        btr   -= rd;
+    }
+    *br = total;
+
+    if (total != want) {
+        printf("[FS] SHORT READ! want=%lu got=%lu res=%d tell=%lu size=%lu\r\n",
+               (unsigned long)want, (unsigned long)total, res,
+               (unsigned long)f_tell((FIL*)file_p),
+               (unsigned long)f_size((FIL*)file_p));
+    }
+    return (res == FR_OK) ? LV_FS_RES_OK : LV_FS_RES_UNKNOWN;
 }
 
 /**
@@ -213,23 +218,44 @@ static lv_fs_res_t fs_write(lv_fs_drv_t * drv, void * file_p, const void * buf, 
  * @return LV_FS_RES_OK: no error, the file is read
  *         any error from lv_fs_res_t enum
  */
+//static lv_fs_res_t fs_seek(lv_fs_drv_t * drv, void * file_p, uint32_t pos, lv_fs_whence_t whence)
+//{
+    //LV_UNUSED(drv);
+    //switch(whence) {
+        //case LV_FS_SEEK_SET:
+            //f_lseek(file_p, pos);
+            //break;
+        //case LV_FS_SEEK_CUR:
+            //f_lseek(file_p, f_tell((FIL *)file_p) + pos);
+            //break;
+        //case LV_FS_SEEK_END:
+            //f_lseek(file_p, f_size((FIL *)file_p) + pos);
+            //break;
+        //default:
+            //break;
+    //}
+    //return LV_FS_RES_OK;
+//}
+static uint32_t s_seek_cnt = 0;   /* list_btn_event_cb 진입 시 0으로 리셋 */
+
 static lv_fs_res_t fs_seek(lv_fs_drv_t * drv, void * file_p, uint32_t pos, lv_fs_whence_t whence)
 {
     LV_UNUSED(drv);
+    FRESULT fr = FR_OK;
+
     switch(whence) {
-        case LV_FS_SEEK_SET:
-            f_lseek(file_p, pos);
-            break;
-        case LV_FS_SEEK_CUR:
-            f_lseek(file_p, f_tell((FIL *)file_p) + pos);
-            break;
-        case LV_FS_SEEK_END:
-            f_lseek(file_p, f_size((FIL *)file_p) + pos);
-            break;
-        default:
-            break;
+        case LV_FS_SEEK_SET: fr = f_lseek(file_p, pos); break;
+        case LV_FS_SEEK_CUR: fr = f_lseek(file_p, f_tell((FIL *)file_p) + pos); break;
+        case LV_FS_SEEK_END: fr = f_lseek(file_p, f_size((FIL *)file_p) + pos); break;
+        default: return LV_FS_RES_INV_PARAM;
     }
-    return LV_FS_RES_OK;
+
+    s_seek_cnt++;
+    if (s_seek_cnt <= 4 || (s_seek_cnt % 50) == 0 || fr != FR_OK)
+        printf("[FS] seek#%lu pos=%lu wh=%d fr=%d\r\n",
+               (unsigned long)s_seek_cnt, (unsigned long)pos, whence, fr);
+
+    return (fr == FR_OK) ? LV_FS_RES_OK : LV_FS_RES_UNKNOWN;
 }
 
 /**

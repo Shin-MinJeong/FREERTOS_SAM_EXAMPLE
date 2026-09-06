@@ -26,7 +26,7 @@ static void my_lcd_flush_cb(lv_disp_drv_t * disp_drv, const lv_area_t * area, lv
     ili9488_set_window(area->x1, area->y1, width, height);
     ili9488_write_ram_prepare();
 	ili9488_write_ram_buffer((const ili9488_color_t *)color_p, total_pixels);
-    ili9488_set_window(0, 0, ILI9488_LCD_WIDTH, ILI9488_LCD_HEIGHT);
+    //ili9488_set_window(0, 0, ILI9488_LCD_WIDTH, ILI9488_LCD_HEIGHT);
 
     lv_disp_flush_ready(disp_drv);
 }

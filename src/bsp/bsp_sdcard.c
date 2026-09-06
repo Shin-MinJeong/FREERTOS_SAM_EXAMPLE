@@ -8,9 +8,6 @@
 #include "main.h"
 
 COMPILER_ALIGNED(32) FATFS fs;
-COMPILER_ALIGNED(32) FIL file;
-COMPILER_ALIGNED(32) char write_data[64] = "SAMV71 SD Card Test Success!";
-COMPILER_ALIGNED(32) char read_data[64];
 
 #ifndef ioport_set_pin_peripheral_mode
 #define ioport_set_pin_peripheral_mode(pin, mode) \
@@ -22,7 +19,6 @@ COMPILER_ALIGNED(32) char read_data[64];
 
 void vSDCardTestTask(void *pvParameters) {
     FRESULT res;
-    UINT bytes_written, bytes_read;
     Ctrl_status status;
 
     printf("--- SD Card Test Start ---\n");
@@ -59,7 +55,7 @@ void vSDCardTestTask(void *pvParameters) {
     }
     printf("Drive Mounted Successfully.\n");
 	
-	dump_images_to_sd();
+	//dump_images_to_sd();
 	
 	xSemaphoreGive(sdMountedSem); 
 	
