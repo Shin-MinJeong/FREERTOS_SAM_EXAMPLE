@@ -512,8 +512,6 @@
       <Value>../src/ASF/common/services/gpio</Value>
       <Value>../src/ASF/sam/drivers/pio</Value>
       <Value>../src/ASF/sam/drivers/mpu</Value>
-      <Value>../src</Value>
-      <Value>../src/config</Value>
       <Value>../src/ASF/sam/drivers/ebi/smc</Value>
       <Value>../src/ASF/sam/components/display/ili9488</Value>
       <Value>../src/ASF/sam/drivers/twihs</Value>
@@ -530,6 +528,14 @@
       <Value>../src/ASF/sam/drivers/hsmci</Value>
       <Value>../src/ASF/sam/drivers/spi</Value>
       <Value>../src/ASF/thirdparty/fatfs/fatfs-port-r0.09/sam</Value>
+      <Value>../src</Value>
+      <Value>../src/config</Value>
+      <Value>../src/lvgl</Value>
+      <Value>../src/lvgl/src</Value>
+      <Value>../src/app/include</Value>
+      <Value>../src/bsp/include</Value>
+      <Value>../src/port/include</Value>
+      <Value>../src/assets/include</Value>
     </ListValues>
   </armgcc.compiler.directories.IncludePaths>
   <armgcc.compiler.optimization.level>Optimize most (-O3)</armgcc.compiler.optimization.level>
@@ -696,14 +702,8 @@
       <Value>../src/ASF/common/services/gpio</Value>
       <Value>../src/ASF/sam/drivers/pio</Value>
       <Value>../src/ASF/sam/drivers/mpu</Value>
-      <Value>../src</Value>
-      <Value>../src/config</Value>
       <Value>../src/ASF/sam/drivers/ebi/smc</Value>
       <Value>../src/ASF/sam/components/display/ili9488</Value>
-      <Value>../src/lvgl</Value>
-      <Value>../src/lvgl/src</Value>
-      <Value>../src/bsp/include</Value>
-      <Value>../src/gui/include</Value>
       <Value>../src/ASF/sam/drivers/twihs</Value>
       <Value>../src/ASF/common/components/touch/mxt</Value>
       <Value>../src/ASF/common/services/twi</Value>
@@ -718,6 +718,14 @@
       <Value>../src/ASF/sam/drivers/hsmci</Value>
       <Value>../src/ASF/sam/drivers/spi</Value>
       <Value>../src/ASF/thirdparty/fatfs/fatfs-port-r0.09/sam</Value>
+      <Value>../src</Value>
+      <Value>../src/config</Value>
+      <Value>../src/lvgl</Value>
+      <Value>../src/lvgl/src</Value>
+      <Value>../src/app/include</Value>
+      <Value>../src/bsp/include</Value>
+      <Value>../src/port/include</Value>
+      <Value>../src/assets/include</Value>
     </ListValues>
   </armgcc.compiler.directories.IncludePaths>
   <armgcc.compiler.optimization.OtherFlags>-fdata-sections</armgcc.compiler.optimization.OtherFlags>
@@ -933,9 +941,7 @@
     <Folder Include="src\ASF\thirdparty\freertos\freertos-10.0.0\Source\portable\GCC\ARM_CM7\" />
     <Folder Include="src\ASF\thirdparty\freertos\freertos-10.0.0\Source\portable\GCC\ARM_CM7\r0p1\" />
     <Folder Include="src\ASF\thirdparty\freertos\freertos-10.0.0\Source\portable\MemMang\" />
-    <Folder Include="src\bsp\include" />
     <Folder Include="src\config\" />
-    <Folder Include="src\gui\include" />
     <Folder Include="src\lvgl\" />
     <Folder Include="src\lvgl\src\" />
     <Folder Include="src\lvgl\src\core\" />
@@ -999,8 +1005,13 @@
     <Folder Include="src\lvgl\src\misc\" />
     <Folder Include="src\lvgl\src\widgets\" />
     <Folder Include="src\bsp" />
-    <Folder Include="src\gui" />
-    <Folder Include="src\image" />
+    <Folder Include="src\app" />
+    <Folder Include="src\port" />
+    <Folder Include="src\assets" />
+    <Folder Include="src\app\include" />
+    <Folder Include="src\bsp\include" />
+    <Folder Include="src\port\include" />
+    <Folder Include="src\assets\include" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="src\ASF\common\components\memory\sd_mmc\sd_mmc.c">
@@ -1129,19 +1140,7 @@
     <Compile Include="src\ASF\thirdparty\fatfs\fatfs-r0.09\src\option\ccsbcs.c">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="src\bsp\bsp_lcd.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\bsp\bsp_sdcard.c">
-      <SubType>compile</SubType>
-    </Compile>
     <Compile Include="src\bsp\bsp_touch.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\bsp\include\bsp_lcd.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\bsp\include\bsp_sys.h">
       <SubType>compile</SubType>
     </Compile>
     <None Include="src\ASF\thirdparty\fatfs\ATMEL-disclaimer.txt">
@@ -1333,9 +1332,6 @@
     <None Include="src\config\conf_mxt.h">
       <SubType>compile</SubType>
     </None>
-    <Compile Include="src\bsp\include\bsp_touch.h">
-      <SubType>compile</SubType>
-    </Compile>
     <None Include="src\config\conf_access.h">
       <SubType>compile</SubType>
     </None>
@@ -1348,57 +1344,9 @@
     <None Include="src\config\conf_fatfs.h">
       <SubType>compile</SubType>
     </None>
-    <Compile Include="src\bsp\include\bsp_sdcard.h">
-      <SubType>compile</SubType>
-    </Compile>
     <None Include="src\config\conf_virtual_mem.h">
       <SubType>compile</SubType>
     </None>
-    <Compile Include="src\gui\gui_app.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\gui\gui_engine.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\gui\include\gui_app.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\gui\include\gui_engine.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\image\cat1.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\image\cat10.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\image\cat2.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\image\cat3.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\image\cat4.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\image\cat5.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\image\cat6.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\image\cat7.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\image\cat8.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\image\cat9.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\main.h">
-      <SubType>compile</SubType>
-    </Compile>
     <None Include="src\config\conf_ili9488.h">
       <SubType>compile</SubType>
     </None>
@@ -2105,9 +2053,6 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\ASF\thirdparty\freertos\freertos-10.0.0\Source\timers.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\bsp\bsp_sys.c">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\lvgl\lvgl.h">
@@ -3184,6 +3129,165 @@
     <Compile Include="src\main.c">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="src\main.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\app\app_boot.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\app\include\app_boot.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\app\include\app_config.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\app\app_diag.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\app\include\app_diag.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\app\app_gallery.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\app\include\app_gallery.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\app\app_ui.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\app\include\app_ui.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\app\image_bitmap.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\app\include\image_bitmap.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\app\image_export.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\app\include\image_export.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\app\image_store.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\app\include\image_store.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\app\screen_gallery.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\app\include\screen_gallery.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\app\screen_viewer.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\app\include\screen_viewer.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\app\include\ui_theme.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\bsp\bsp_board.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\bsp\include\bsp_board.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\bsp\bsp_display.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\bsp\include\bsp_display.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\bsp\bsp_storage.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\bsp\include\bsp_storage.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\bsp\include\bsp_touch.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\bsp\include\bsp_touch_cfg.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\port\fs_io.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\port\include\fs_io.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\port\include\log.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\port\include\lv_port_cfg.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\port\lv_port_disp.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\port\include\lv_port_disp.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\port\lv_port_indev.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\port\include\lv_port_indev.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\port\os_task.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\port\include\os_task.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\port\include\rtos_hooks.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\port\rtos_hooks.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\assets\assets_img.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\assets\include\assets_img.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <None Include="src\assets\img_cat1.c">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\assets\img_cat2.c">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\assets\img_cat3.c">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\assets\img_cat4.c">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\assets\img_cat5.c">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\assets\img_cat6.c">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\assets\img_cat7.c">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\assets\img_cat8.c">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\assets\img_cat9.c">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\assets\img_cat10.c">
+      <SubType>compile</SubType>
+    </None>
     <None Include="src\ASF\thirdparty\freertos\freertos-10.0.0\Source\portable\readme.txt">
       <SubType>compile</SubType>
     </None>
